@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${user.getName() + ' profile'}"></title>
+</head>
+<body>
+    <div th:object="${user}">
+        <h1 th:text="${user.getName()}"></h1>
+
+        <br>
+
+        <p th:text="${user.getBio()}"></p>
+
+        <br>
+
+        <p>All friends</p>
+        <div th:each="friend : ${friends}">
+            <p th:text="${friend.getName()}"></p>
+            <p th:text="${friend.getNickname()}"></p>
+
+            <hr>
+        </div>
+
+        <br>
+
+        <p>All subscribers</p>
+        <div th:each="request : ${friend_requests}">
+            <p th:text="${request.getSender().getName()}"></p>
+            <p th:text="${request.getSender().getNickname()}"></p>
+            <hr>
+        </div>
+
+        <br>
+
+        <p>All users</p>
+        <form th:object="${users}" method="post" th:action="@{/friends/send}">
+            <input type="hidden" name="sender_id" th:value="${user.getId()}">
+            <select name="receiver_id" >
+                <option th:each="eachUser : ${users}" th:value="${eachUser.getId()}" th:text="${eachUser.getName()}"></option>
+            </select>
+
+            <br>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <p>Friend requests</p>
+        <form th:object="${friend_requests}" method="post" th:action="@{/friends/respond}">
+            <input type="hidden" name="accept" value="true">
+            <select name="request_id" >
+                <option th:each="request : ${friend_requests}" th:value="${request.getId()}" th:text="${request.getSender().getName()}"></option>
+            </select>
+
+            <br>
+
+            <button type="submit">Submit</button>
+        </form>
+
+    </div>
+</body>
+</html>
