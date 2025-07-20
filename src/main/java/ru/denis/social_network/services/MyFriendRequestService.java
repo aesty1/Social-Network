@@ -3,7 +3,7 @@ package ru.denis.social_network.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.denis.social_network.models.MyFriend;
-import ru.denis.social_network.models.MyFriendRequest;
+import ru.denis.social_network.models.dto.MyFriendRequest;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.repositories.MyFriendRepository;
 import ru.denis.social_network.repositories.MyFriendRequestRepository;
@@ -64,7 +64,7 @@ public class MyFriendRequestService {
         myFriendRequestRepository.save(request);
     }
 
-    public List<MyFriendRequest> findByReceiverAndStatus(MyUser receiver, String status) {
-        return myFriendRequestRepository.findByReceiverAndStatus(receiver, status);
+    public List<MyFriendRequest> findByReceiverAndStatus(MyUser receiver, String status, String status2) {
+        return myFriendRequestRepository.findByReceiverAndStatusOrStatus(receiver, status, status2);
     }
 }

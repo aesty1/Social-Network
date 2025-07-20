@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Редактирование профиля</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome для иконок -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .profile-edit-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 30px;
+        }
+        .profile-edit-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .form-control {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ced4da;
+        }
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        .btn-save {
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+<div class="container profile-edit-container">
+    <div class="profile-header text-center">
+        <h1><i class="fas fa-user-edit me-2"></i>Редактирование профиля</h1>
+    </div>
+
+    <div class="card profile-edit-card mb-5">
+        <div class="card-body p-4">
+            <!-- Сообщения об успехе/ошибке -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Форма редактирования -->
+            <form th:action="@{/profile/edit/save}" method="post" th:object="${profileUpdateDto}">
+                <div class="mb-3">
+                    <label class="form-label">Имя</label>
+                    <input type="text" class="form-control"
+                           th:placeholder="${profileUpdateDto.getName()}"
+                           th:field="*{name}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Никнейм</label>
+                    <input type="text" class="form-control"
+                           th:placeholder="${profileUpdateDto.getNickname()}"
+                           th:field="*{nickname}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">О себе</label>
+                    <textarea class="form-control"
+                              th:placeholder="${profileUpdateDto.getBio()}"
+                              th:field="*{bio}"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="#" class="text-decoration-none" onclick="history.back()">
+                        <i class="fas fa-arrow-left me-1"></i> Назад
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-save">
+                        <i class="fas fa-save me-1"></i> Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -2,61 +2,274 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${user.getName() + ' profile'}"></title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid white;
+            background-color: #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #6c757d;
+        }
+        .profile-stats {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .nav-tabs .nav-link.active {
+            border-bottom: 3px solid #0d6efd;
+            font-weight: 600;
+        }
+        .friend-card {
+            transition: transform 0.2s;
+        }
+        .friend-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        .friend-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #6c757d;
+        }
+        .section-title {
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+            margin: 25px 0 20px;
+        }
+        .form-card {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-    <div th:object="${user}">
-        <h1 th:text="${user.getName()}"></h1>
-
-        <br>
-
-        <p th:text="${user.getBio()}"></p>
-
-        <br>
-
-        <p>All friends</p>
-        <div th:each="friend : ${friends}">
-            <p th:text="${friend.getName()}"></p>
-            <p th:text="${friend.getNickname()}"></p>
-
-            <hr>
+<!-- Навигация -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-users me-2"></i>SocialNetwork
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/me}">Профиль</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/friends}">Друзья</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/api/chats}">Сообщения</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-cog"></i></a>
+                </li>
+            </ul>
         </div>
+    </div>
+</nav>
 
-        <br>
-
-        <p>All subscribers</p>
-        <div th:each="request : ${friend_requests}">
-            <p th:text="${request.getSender().getName()}"></p>
-            <p th:text="${request.getSender().getNickname()}"></p>
-            <hr>
+<!-- Шапка профиля -->
+<div class="profile-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <div class="profile-avatar mb-3 mx-auto">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <h1 class="display-5" th:text="${user.getName()}"></h1>
+                <p class="lead mb-0" th:text="${user.getBio()} ?: 'Пользователь еще не добавил информацию о себе'"></p>
+                <div class="d-flex mt-3">
+                    <a th:href="@{/profile/edit}" class="btn btn-light me-2">
+                        <i class="fas fa-edit me-1"></i> Редактировать профиль
+                    </a>
+                    <a th:href="@{/profile/edit/password}" class="btn btn-light me-2">
+                        <i class="fas fa-edit me-1"></i> Изменить пароль
+                    </a>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
 
-        <br>
-
-        <p>All users</p>
-        <form th:object="${users}" method="post" th:action="@{/friends/send}">
-            <input type="hidden" name="sender_id" th:value="${user.getId()}">
-            <select name="receiver_id" >
-                <option th:each="eachUser : ${users}" th:value="${eachUser.getId()}" th:text="${eachUser.getName()}"></option>
-            </select>
-
-            <br>
-
-            <button type="submit">Submit</button>
-        </form>
-
-        <p>Friend requests</p>
-        <form th:object="${friend_requests}" method="post" th:action="@{/friends/respond}">
-            <input type="hidden" name="accept" value="true">
-            <select name="request_id" >
-                <option th:each="request : ${friend_requests}" th:value="${request.getId()}" th:text="${request.getSender().getName()}"></option>
-            </select>
-
-            <br>
-
-            <button type="submit">Submit</button>
-        </form>
+<div class="container mb-5">
+    <!-- Статистика профиля -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="profile-stats text-center">
+                <h5 class="text-muted">Друзья</h5>
+                <h3 class="text-primary" th:text="${friends.size()}"></h3>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="profile-stats text-center">
+                <h5 class="text-muted">Подписчики</h5>
+                <h3 class="text-primary" th:text="${filteredFriends.size()}"></h3>
+            </div>
+        </div>
 
     </div>
+
+    <!-- Навигация по профилю -->
+    <ul class="nav nav-tabs mb-4" id="profileTabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#friends">Друзья</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#subscribers">Подписчики</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#findFriends">Найти друзей</a>
+        </li>
+
+    </ul>
+
+    <div class="tab-content">
+        <!-- Вкладка Друзья -->
+        <div class="tab-pane fade show active" id="friends">
+            <h3 class="section-title">Заявки</h3>
+            <div class="row">
+                <div th:each="friend : ${friend_requests}" class="col-lg-3 col-md-4 col-sm-6 mb-4" >
+                    <div class="card friend-card h-100" th:if="${friend.getStatus() == 'PENDING'}">
+                        <div class="card-body text-center">
+                            <div class="friend-avatar mx-auto mb-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h5 class="card-title" th:text="${friend.getSender().getName()}"></h5>
+                            <p class="card-text text-muted" th:text="${friend.getSender().getNickname()}"></p>
+                            <div class="d-flex justify-content-center">
+                                <form th:method="post" th:action="@{/friends/respond/{id}(id=${friend.getId()})}">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+
+                                </form>
+                                <form th:method="post" th:action="@{/friends/cancel/{id}(id=${friend.getId()})}">
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-user-times"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${friends.isEmpty()}" class="col-12 text-center py-5">
+                    <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
+                    <h4>У вас пока нет друзей</h4>
+                    <p class="text-muted">Начните добавлять друзей, используя вкладку "Найти друзей"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Подписчики -->
+        <div class="tab-pane fade" id="subscribers">
+            <h3 class="section-title">Подписчики</h3>
+            <div class="row">
+                <div th:each="request : ${friend_requests}" class="col-lg-4 col-md-6 mb-4">
+                    <div class="card" th:if="${request.getStatus() == 'PENDING' or request.getStatus() == 'DECLINED' and request.getSender().getId() != user.getId()}">
+                        <div class="card-body" >
+                            <div class="d-flex align-items-center">
+                                <div class="friend-avatar me-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-0" th:text="${request.getSender().getName()}"></h5>
+                                    <p class="card-text text-muted" th:text="${request.getSender().getNickname()}"></p>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${friend_requests.isEmpty()}" class="col-12 text-center py-5">
+                    <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                    <h4>У вас пока нет подписчиков</h4>
+                    <p class="text-muted">Когда кто-то отправит вам запрос на добавление в друзья, он появится здесь</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Найти друзей -->
+        <div class="tab-pane fade" id="findFriends">
+            <h3 class="section-title">Найти друзей</h3>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card form-card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-user-plus me-2"></i> Отправить запрос на дружбу
+                        </div>
+                        <div class="card-body">
+                            <form th:object="${users}" method="post" th:action="@{/friends/send}">
+                                <input type="hidden" name="sender_id" th:value="${user.getId()}">
+                                <div class="mb-3">
+                                    <label class="form-label">Выберите пользователя:</label>
+                                    <select name="receiver_id" class="form-select">
+                                        <option th:each="eachUser : ${users}"
+                                                th:value="${eachUser.getId()}"
+                                                th:text="${eachUser.getName()}"></option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-paper-plane me-2"></i> Отправить запрос
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Активация первой вкладки
+    document.addEventListener('DOMContentLoaded', function() {
+        var firstTab = new bootstrap.Tab(document.querySelector('#profileTabs .nav-link'));
+        firstTab.show();
+    });
+</script>
 </body>
 </html>

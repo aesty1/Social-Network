@@ -11,4 +11,5 @@ import java.util.List;
 public interface MyFriendRepository extends JpaRepository<MyFriend, Integer> {
     List<MyFriend> findByUser(MyUser user);
     List<MyFriend> findByFriend(MyUser friend);
+    void deleteAllByUserAndFriend(MyUser user, MyUser friend);
 }

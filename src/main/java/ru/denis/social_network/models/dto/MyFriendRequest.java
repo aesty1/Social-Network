@@ -1,7 +1,7 @@
-package ru.denis.social_network.models;
+package ru.denis.social_network.models.dto;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import ru.denis.social_network.models.MyUser;
 
 import java.time.LocalDateTime;
 

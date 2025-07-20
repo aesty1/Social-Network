@@ -6,8 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.denis.social_network.models.MyFriendRequest;
-import ru.denis.social_network.repositories.MyFriendRequestRepository;
+import ru.denis.social_network.models.dto.MyFriendRequest;
 import ru.denis.social_network.services.MyFriendRequestService;
 
 @RestController
@@ -22,7 +21,7 @@ public class FriendRequestController {
     public ResponseEntity<?> send(@RequestParam int sender_id, @RequestParam int receiver_id) {
         MyFriendRequest request = myFriendRequestService.sendFriendRequest(sender_id, receiver_id);
 
-        return ResponseEntity.ok(request);
+        return ResponseEntity.ok("Response sended");
     }
 
     @PostMapping("/respond")

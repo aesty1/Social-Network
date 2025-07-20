@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -41,6 +43,21 @@ public class MyUser {
 
     @Column(name = "nickname")
     private String nickname;
+
+    @OneToMany(mappedBy = "user1")
+    private Set<MyChat> chatsAsUser1 = new HashSet<>();
+
+    @OneToMany(mappedBy = "user2")
+    private Set<MyChat> chatsAsUser2 = new HashSet<>();
+
+    @OneToMany(mappedBy = "sender")
+    private Set<MyMessage> sentMessages = new HashSet<>();
+
+    @OneToMany(mappedBy = "recipient")
+    private Set<MyMessage> receivedMessages = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MyChatParticipant> chatParticipants = new HashSet<>();
 
     public MyUser(String email, String name, String password, String avatar, String bio, String nickname) {
         this.email = email;
