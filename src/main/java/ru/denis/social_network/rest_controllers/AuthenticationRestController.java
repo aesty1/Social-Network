@@ -23,6 +23,8 @@ import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.LoginForm;
 import ru.denis.social_network.services.MyUserService;
 
+import javax.validation.Valid;
+
 @RestController
 public class AuthenticationRestController {
 
@@ -39,7 +41,7 @@ public class AuthenticationRestController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@ModelAttribute MyUser myUser) {
+    public ResponseEntity<?> register(@Valid @ModelAttribute MyUser myUser) {
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
 
         myUserService.save(myUser);
@@ -48,7 +50,7 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/authenticate")
-    public String login(@ModelAttribute LoginForm loginForm, Model model, HttpServletResponse response) {
+    public String login(@Valid @ModelAttribute LoginForm loginForm, Model model, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginForm.username(),
                 loginForm.password()

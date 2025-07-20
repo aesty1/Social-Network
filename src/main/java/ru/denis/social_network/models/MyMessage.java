@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,17 +22,22 @@ public class MyMessage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id", nullable = false)
+    @NotNull
     private MyChat chat;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
+    @NotNull
     private MyUser sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id")
+    @NotNull
     private MyUser recipient;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @NotNull
+    @Size(min = 1, max = 255)
     private String content;
 
     @CreationTimestamp

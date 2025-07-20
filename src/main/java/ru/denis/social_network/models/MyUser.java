@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import javax.validation.constraints.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -18,12 +19,19 @@ public class MyUser {
     private int id;
 
     @Column(nullable = false, unique = true, length = 128)
+    @NotNull
+    @Size(min = 5)
+    @Email
     private String email;
 
     @Column(nullable = false, length = 128)
+    @NotNull
+    @Size(min = 5, max = 40)
     private String name;
 
     @Column(nullable = false, length = 128)
+    @NotNull
+    @Size(min = 8, max = 120)
     private String password;
 
     @Column(name = "created_at")
@@ -42,6 +50,8 @@ public class MyUser {
     private String bio;
 
     @Column(name = "nickname")
+    @NotNull
+    @Size(min = 3, max = 40)
     private String nickname;
 
     @OneToMany(mappedBy = "user1")

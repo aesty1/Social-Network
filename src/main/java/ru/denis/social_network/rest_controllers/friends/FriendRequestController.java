@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.denis.social_network.models.dto.MyFriendRequest;
 import ru.denis.social_network.services.MyFriendRequestService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/friends")
 public class FriendRequestController {
@@ -18,14 +20,14 @@ public class FriendRequestController {
 
 
     @PostMapping("/send")
-    public ResponseEntity<?> send(@RequestParam int sender_id, @RequestParam int receiver_id) {
+    public ResponseEntity<?> send(@Valid @RequestParam int sender_id, @Valid @RequestParam int receiver_id) {
         MyFriendRequest request = myFriendRequestService.sendFriendRequest(sender_id, receiver_id);
 
         return ResponseEntity.ok("Response sended");
     }
 
     @PostMapping("/respond")
-    public ResponseEntity<?> respond(@RequestParam boolean accept, @RequestParam int request_id) {
+    public ResponseEntity<?> respond(@Valid @RequestParam boolean accept, @Valid @RequestParam int request_id) {
         myFriendRequestService.respondToFriendRequest(request_id, accept);
 
         return ResponseEntity.ok("Response recorded");

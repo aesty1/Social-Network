@@ -16,6 +16,8 @@ import ru.denis.social_network.services.MyChatService;
 import ru.denis.social_network.services.MyMessageService;
 import ru.denis.social_network.services.MyUserService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +34,7 @@ public class ChatController {
     private final MyMessageService myMessageService;
 
     @PostMapping
-    public MyChat createChat(@RequestBody CreateChatRequest createChatRequest) {
+    public MyChat createChat(@Valid @RequestBody CreateChatRequest createChatRequest) {
         return myChatService.createChat(createChatRequest.getParticipantIds());
     }
 
@@ -46,7 +48,7 @@ public class ChatController {
     }
 
     @GetMapping("/chat/{chatId}")
-    public String getChat(@PathVariable int chatId, Model model, HttpServletRequest request) {
+    public String getChat(@PathVariable @Min(1) int chatId, Model model, HttpServletRequest request) {
         System.out.println();
         model.addAttribute("chat", myChatService.getChatById(chatId));
         model.addAttribute("messages", myMessageService.getMessagesSortedByTime(chatId));

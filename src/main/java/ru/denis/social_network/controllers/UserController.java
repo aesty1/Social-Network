@@ -19,6 +19,8 @@ import ru.denis.social_network.services.MyFriendRequestService;
 import ru.denis.social_network.services.MyFriendService;
 import ru.denis.social_network.services.MyUserService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -69,28 +71,28 @@ public class UserController {
     }
 
     @PostMapping("/friends/add/{id}")
-    public ResponseEntity<?> addFriend(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<?> addFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.sendFriendRequest(getCurrentUserId(request), id);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/friends/remove/{id}")
-    public ResponseEntity<?> remvoeFriend(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<?> remvoeFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendService.deleteFriend(getCurrentUserId(request), id);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/friends/respond/{id}")
-    public ResponseEntity<?> respondToFriend(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<?> respondToFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.respondToFriendRequest(id, true);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/friends/cancel/{id}")
-    public ResponseEntity<?> respondToFriendCancel(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<?> respondToFriendCancel(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.respondToFriendRequest(id, false);
 
         return ResponseEntity.ok().build();
@@ -107,7 +109,7 @@ public class UserController {
     }
 
     @PostMapping("/profile/edit/save")
-    public String saveProfile(@ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
+    public String saveProfile(@Valid @ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
         if(result.hasErrors()) {
             return "editProfile";
         }
@@ -132,7 +134,7 @@ public class UserController {
     }
 
     @PostMapping("/profile/edit/password/save")
-    public ResponseEntity<?> changePassword(@ModelAttribute ChangePasswordDto changePasswordDto, HttpServletRequest request) {
+    public ResponseEntity<?> changePassword(@Valid @ModelAttribute ChangePasswordDto changePasswordDto, HttpServletRequest request) {
         System.out.println(changePasswordDto.getNewPassword());
         myUserService.changePassword(changePasswordDto, myUserService.getUserById(getCurrentUserId(request)));
 
