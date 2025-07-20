@@ -30,6 +30,6 @@ application.properties
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+C:\Users\user\IdeaProjects\Social-Network\src\main\resources\application.properties
 ### VS Code ###
 .vscode/
