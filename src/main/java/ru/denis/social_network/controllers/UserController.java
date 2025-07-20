@@ -109,7 +109,7 @@ public class UserController {
     }
 
     @PostMapping("/profile/edit/save")
-    public String saveProfile(@Valid @ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
+    public String saveProfile(@ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
         if(result.hasErrors()) {
             return "editProfile";
         }
@@ -134,7 +134,7 @@ public class UserController {
     }
 
     @PostMapping("/profile/edit/password/save")
-    public ResponseEntity<?> changePassword(@Valid @ModelAttribute ChangePasswordDto changePasswordDto, HttpServletRequest request) {
+    public ResponseEntity<?> changePassword(@ModelAttribute ChangePasswordDto changePasswordDto, HttpServletRequest request) {
         System.out.println(changePasswordDto.getNewPassword());
         myUserService.changePassword(changePasswordDto, myUserService.getUserById(getCurrentUserId(request)));
 
