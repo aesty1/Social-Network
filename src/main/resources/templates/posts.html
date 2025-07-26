@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Infinite Posts</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome для иконок -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 0;
+    }
+    .posts-container {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+    .page-header {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      padding: 2rem;
+      margin-bottom: 30px;
+      border-radius: 0 0 10px 10px;
+    }
+    .post-card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 25px;
+      transition: transform 0.3s ease;
+      background-color: white;
+    }
+    .post-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    .post-author {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px 0 20px;
+    }
+    .post-author img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 15px;
+      object-fit: cover;
+      border: 2px solid #e9ecef;
+    }
+    .author-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .author-name {
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 2px;
+    }
+    .post-time {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+    .post-content {
+      padding: 15px 20px;
+      color: #495057;
+      line-height: 1.6;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .post-actions {
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .post-stats {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+    .action-btn {
+      color: #6c757d;
+      border: none;
+      background: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+    .action-btn:hover {
+      color: #0d6efd;
+      background-color: #f8f9fa;
+    }
+    .action-btn i {
+      margin-right: 5px;
+    }
+    #loading {
+      text-align: center;
+      padding: 30px;
+      display: none;
+      font-size: 18px;
+      color: #6c757d;
+    }
+    #status {
+      color: #6c757d;
+      margin: 15px 0;
+      font-size: 0.9rem;
+      min-height: 20px;
+      text-align: center;
+    }
+    #next {
+      padding: 10px 25px;
+      font-weight: 600;
+      border-radius: 8px;
+      display: block;
+      margin: 30px auto;
+      width: 200px;
+    }
+    .no-posts {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+      font-size: 1.1rem;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    .comments-link {
+      text-decoration: none;
+      color: #0d6efd;
+      font-weight: 500;
+    }
+    .comments-link:hover {
+      text-decoration: underline;
+    }
+    .likeButton {
+      border: none;
+      outline: none;
+      background: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Навигация -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-users me-2"></i>SocialNetwork
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link active" th:href="@{/me}">Профиль</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/friends}">Друзья</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/api/chats}">Сообщения</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="fas fa-cog"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header text-center">
+  <h1><i class="fas fa-infinity me-2"></i>Infinite Posts Feed</h1>
+</div>
+
+<div class="posts-container">
+  <div id="status"></div>
+  <div id="posts-container"></div>
+  <div id="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading posts...</p>
+  </div>
+  <button id="next" class="btn btn-primary">Next Post</button>
+</div>
+
+<!-- Bootstrap 5 JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const postsContainer = document.getElementById('posts-container');
+  const loadingIndicator = document.getElementById('loading');
+  const statusDiv = document.getElementById('status');
+  const nextButton = document.getElementById('next');
+
+  let stompClient = null;
+  let sessionId = null;
+  let currentPost = null;
+
+  function showStatus(message) {
+    statusDiv.innerText = new Date().toLocaleTimeString() + ': ' + message;
+    console.log(message);
+  }
+
+  function connect() {
+    showStatus('Connecting to WebSocket...');
+
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function(frame) {
+      showStatus('Connected to WebSocket');
+
+      const match = /\/([^\/]+)\/websocket/.exec(socket._transport.url);
+      sessionId = match ? match[1] : 'unknown';
+      showStatus('Session ID: ' + sessionId);
+
+      // Subscribe to posts
+      stompClient.subscribe('/topic/posts/' + sessionId, function(message) {
+        const response = message.body;
+
+        if (response === "NO_POSTS_AVAILABLE") {
+          showStatus('No more posts available');
+          postsContainer.innerHTML = '<div class="no-posts"><i class="far fa-folder-open me-2"></i>No more posts available</div>';
+          nextButton.disabled = true;
+          return;
+        }
+
+        try {
+          const post = JSON.parse(response);
+          showStatus('Received post: ' + post.id);
+          renderPost(post);
+          currentPost = post;
+          nextButton.disabled = false;
+
+        } catch (e) {
+          console.error("Error parsing post:", e);
+          showStatus('Error displaying post');
+        }
+        loadingIndicator.style.display = 'none';
+      });
+
+      // Initialize session
+      stompClient.send("/app/posts.init", {}, JSON.stringify({}));
+
+    }, function(error) {
+      showStatus('WebSocket Error: ' + error);
+      loadingIndicator.style.display = 'none';
+    });
+  }
+
+  function renderPost(post) {
+    const postElement = document.createElement('div');
+    postElement.className = 'post-card';
+    postElement.innerHTML = `
+      <div class="post-author">
+        <img src="${post.author.profilePicture || 'https://online-uslygi.ru/img/icon.png'}" alt="Profile">
+        <div class="author-info">
+          <span class="author-name">${post.author.name}</span>
+          <span class="post-time">${new Date(post.createdAt).toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="post-content">${post.content}</div>
+      <div class="post-actions">
+        <div class="post-stats">
+            <form method="post" action="/posts/${post.id}/like">
+                <button class="likeButton" type="submit"><i class="far fa-thumbs-up"></i> ${post.likeCount}</button>
+                <span class="ms-3"><i class="far fa-comment"></i>  ${post.comments.length}</span>
+            </form>
+
+
+        </div>
+        <div>
+          <a href="/posts/${post.id}/comments" class="comments-link">
+            <i class="far fa-comment-dots me-1"></i>Comments
+          </a>
+        </div>
+      </div>
+    `;
+
+    // Add the new post at the top of the container
+    postsContainer.appendChild(postElement);
+  }
+
+  function getNextPost() {
+    console.log("scroll");
+    showStatus('Requesting next post...');
+    loadingIndicator.style.display = 'block';
+    nextButton.disabled = true;
+
+    if (stompClient && stompClient.connected) {
+      const lastPostId = currentPost ? currentPost.id : null;
+      stompClient.send("/app/posts.next", {}, JSON.stringify(lastPostId));
+    } else {
+      showStatus('Connection not established yet');
+      loadingIndicator.style.display = 'none';
+      nextButton.disabled = false;
+    }
+  }
+
+  nextButton.addEventListener('click', getNextPost);
+
+  // Initialize connection
+  window.onload = function() {
+    connect();
+  };
+</script>
+</body>
+</html>

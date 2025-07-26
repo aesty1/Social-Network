@@ -44,6 +44,7 @@ public class UserController {
 
     @GetMapping("/me")
     public String getProfile(Model model, HttpServletRequest request) {
+
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
         List<MyUser> friends = myFriendService.getFriends(user.getId());
         model.addAttribute("user", user);
@@ -140,14 +141,6 @@ public class UserController {
 
         return ResponseEntity.ok().build();
     }
-
-
-
-
-
-
-
-
 
 
     private int getCurrentUserId(HttpServletRequest request) {
