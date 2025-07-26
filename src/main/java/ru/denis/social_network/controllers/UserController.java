@@ -2,6 +2,7 @@ package ru.denis.social_network.controllers;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
@@ -21,6 +22,7 @@ import ru.denis.social_network.services.MyUserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -50,14 +52,18 @@ public class UserController {
         model.addAttribute("user", user);
         model.addAttribute("friends", friends);
         model.addAttribute("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
-        model.addAttribute("friend_requests", myFriendRequestService.findByReceiverAndStatus(user, "PENDING", "DECLINED"));
 
 
         // Фильтруем только DECLINED и PENDING
-        List<MyFriendRequest> filteredFriends = myFriendRequestService.findByReceiverAndStatus(user, "PENDING", "DECLINED").stream()
+        List<MyFriendRequest> filteredFriends = myFriendRequestService.findByReceiverAndStatus(user, "PENDING").stream()
                 .filter(f -> f.getSender().getId() != user.getId()).toList();
+        if(filteredFriends.size() > 0) {
 
-        model.addAttribute("filteredFriends", filteredFriends);
+            model.addAttribute("filteredFriends", filteredFriends);
+        } else {
+            model.addAttribute("filteredFriends", new ArrayList<>());
+        }
+
 
         return "users/getOne";
     }
@@ -72,31 +78,31 @@ public class UserController {
     }
 
     @PostMapping("/friends/add/{id}")
-    public ResponseEntity<?> addFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public String addFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.sendFriendRequest(getCurrentUserId(request), id);
 
-        return ResponseEntity.ok().build();
+        return "redirect:/me";
     }
 
     @PostMapping("/friends/remove/{id}")
-    public ResponseEntity<?> remvoeFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public String remvoeFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendService.deleteFriend(getCurrentUserId(request), id);
 
-        return ResponseEntity.ok().build();
+        return "redirect:/me";
     }
 
     @PostMapping("/friends/respond/{id}")
-    public ResponseEntity<?> respondToFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public String respondToFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.respondToFriendRequest(id, true);
 
-        return ResponseEntity.ok().build();
+        return "redirect:/me";
     }
 
     @PostMapping("/friends/cancel/{id}")
-    public ResponseEntity<?> respondToFriendCancel(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public String respondToFriendCancel(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.respondToFriendRequest(id, false);
 
-        return ResponseEntity.ok().build();
+        return "redirect:/me";
     }
 
     @GetMapping("/profile/edit")

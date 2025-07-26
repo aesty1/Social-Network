@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 import ru.denis.social_network.jwts.JwtProvider;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.LoginForm;
@@ -50,7 +51,7 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/authenticate")
-    public String login(@Valid @ModelAttribute LoginForm loginForm, Model model, HttpServletResponse response) {
+    public RedirectView login(@Valid @ModelAttribute LoginForm loginForm, Model model, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginForm.username(),
                 loginForm.password()
@@ -68,7 +69,7 @@ public class AuthenticationRestController {
 
             response.addCookie(cookie);
 
-            return jwt;
+            return new RedirectView("/me");
         } else {
             throw new UsernameNotFoundException("Bad credentials");
         }

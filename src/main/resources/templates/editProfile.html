@@ -56,12 +56,12 @@
 <body>
 <div class="container profile-edit-container">
     <div class="profile-header text-center">
-        <h1><i class="fas fa-user-edit me-2"></i>Редактирование профиля</h1>
+        <h1><i class="fas fa-user-edit me-2"></i>Edit Profile</h1>
     </div>
 
     <div class="card profile-edit-card mb-5">
         <div class="card-body p-4">
-            <!-- Сообщения об успехе/ошибке -->
+            <!-- Success/error messages -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
                 <span th:text="${successMessage}"></span>
@@ -74,24 +74,24 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
-            <!-- Форма редактирования -->
+            <!-- Edit form -->
             <form th:action="@{/profile/edit/save}" method="post" th:object="${profileUpdateDto}">
                 <div class="mb-3">
-                    <label class="form-label">Имя</label>
+                    <label class="form-label">Name</label>
                     <input type="text" class="form-control"
                            th:placeholder="${profileUpdateDto.getName()}"
                            th:field="*{name}">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Никнейм</label>
+                    <label class="form-label">Nickname</label>
                     <input type="text" class="form-control"
                            th:placeholder="${profileUpdateDto.getNickname()}"
                            th:field="*{nickname}">
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">О себе</label>
+                    <label class="form-label">About Me</label>
                     <textarea class="form-control"
                               th:placeholder="${profileUpdateDto.getBio()}"
                               th:field="*{bio}"></textarea>
@@ -99,10 +99,10 @@
 
                 <div class="d-flex justify-content-between align-items-center">
                     <a href="#" class="text-decoration-none" onclick="history.back()">
-                        <i class="fas fa-arrow-left me-1"></i> Назад
+                        <i class="fas fa-arrow-left me-1"></i> Back
                     </a>
                     <button type="submit" class="btn btn-primary btn-save">
-                        <i class="fas fa-save me-1"></i> Сохранить изменения
+                        <i class="fas fa-save me-1"></i> Save Changes
                     </button>
                 </div>
             </form>

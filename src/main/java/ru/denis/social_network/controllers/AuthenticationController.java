@@ -15,4 +15,9 @@ public class AuthenticationController {
         model.addAttribute("loginForm", loginForm);
         return "login";
     }
+
+    @GetMapping("/register")
+    public String registerPage(Model model) {
+        return "register";
+    }
 }

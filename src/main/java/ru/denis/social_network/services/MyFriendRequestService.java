@@ -64,7 +64,7 @@ public class MyFriendRequestService {
         myFriendRequestRepository.save(request);
     }
 
-    public List<MyFriendRequest> findByReceiverAndStatus(MyUser receiver, String status, String status2) {
-        return myFriendRequestRepository.findByReceiverAndStatusOrStatus(receiver, status, status2);
+    public List<MyFriendRequest> findByReceiverAndStatus(MyUser receiver, String status) {
+        return myFriendRequestRepository.findByReceiverAndStatus(receiver, status);
     }
 }

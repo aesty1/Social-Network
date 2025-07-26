@@ -68,10 +68,14 @@
             border-radius: 10px;
             overflow: hidden;
         }
+        .friendsDiv {
+            margin-left: 50px;
+        }
     </style>
 </head>
 <body>
 <!-- Навигация -->
+<!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand" href="#">
@@ -83,13 +87,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/me}">Профиль</a>
+                    <a class="nav-link" th:href="@{/me}">Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" th:href="@{/friends}">Друзья</a>
+                    <a class="nav-link active" th:href="@{/friends}">Friends</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/api/chats}">Сообщения</a>
+                    <a class="nav-link" th:href="@{/api/chats}">Messages</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/posts}">Posts</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#"><i class="fas fa-cog"></i></a>
@@ -98,7 +105,7 @@
         </div>
     </div>
 </nav>
-    <div th:each="friend : ${friends}" class="col-lg-3 col-md-4 col-sm-6 mb-4" >
+    <div th:if="${friends}" th:each="friend : ${friends}" class="col-lg-3 col-md-4 col-sm-6 mb-4 friendsDiv" >
         <div class="card friend-card h-100">
             <div class="card-body text-center">
                 <div class="friend-avatar mx-auto mb-3">
@@ -114,6 +121,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div th:if="${friends.size() == 0}" class="friendsDiv">
+        You don't have any friends. :(
     </div>
 
     <!-- Bootstrap JS -->

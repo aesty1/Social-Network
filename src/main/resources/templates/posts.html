@@ -142,7 +142,7 @@
 </head>
 <body>
 
-<!-- Навигация -->
+<!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container">
     <a class="navbar-brand" href="#">
@@ -154,13 +154,16 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <a class="nav-link active" th:href="@{/me}">Профиль</a>
+          <a class="nav-link" th:href="@{/me}">Profile</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/friends}">Друзья</a>
+          <a class="nav-link" th:href="@{/friends}">Friends</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/api/chats}">Сообщения</a>
+          <a class="nav-link" th:href="@{/api/chats}">Messages</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" th:href="@{/posts}">Posts</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#"><i class="fas fa-cog"></i></a>
