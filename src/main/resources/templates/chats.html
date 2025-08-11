@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat List</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     .chat-item {
       border-bottom: 1px solid #eee;
@@ -28,6 +29,9 @@
     .unread {
       font-weight: bold;
     }
+    .start-chat-btn {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -43,6 +47,9 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
+          <a class="nav-link" th:href="@{/search}">Search</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" th:href="@{/me}">Profile</a>
         </li>
         <li class="nav-item">
@@ -54,23 +61,26 @@
         <li class="nav-item">
           <a class="nav-link" th:href="@{/posts}">Posts</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#"><i class="fas fa-cog"></i></a>
-        </li>
       </ul>
     </div>
   </div>
 </nav>
+
 <div class="container mt-4">
-  <h1 class="mb-4">My Chats</h1>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>My Chats</h1>
+    <a th:href="@{/search}" class="btn btn-primary start-chat-btn">
+      <i class="fas fa-plus me-2"></i>Start New Chat
+    </a>
+  </div>
 
   <div class="list-group">
     <!-- Chat item template with Thymeleaf (will repeat for each chat in the list) -->
     <a th:each="chat : ${chats}" th:href="@{/api/chat/{id}(id=${chat.getChatId()})}" class="list-group-item list-group-item-action chat-item">
       <div class="d-flex w-100 justify-content-between">
-        <h5 class="mb-1 chat-name" th:text="${chat.getUser1().getNickname() == nickname}
-      ? ${chat.getUser2().getNickname()}
-      : ${chat.getUser1().getNickname()}">John Doe</h5>
+        <h5 class="mb-1 chat-name" th:text="${chat.getUser1_name() == nickname}
+      ? ${chat.getUser2_name()}
+      : ${chat.getUser1_name()}">John Doe</h5>
         <small th:text="${#temporals.format(chat.getLastMessageAt(), 'HH:mm')}">12:30</small>
       </div>
     </a>

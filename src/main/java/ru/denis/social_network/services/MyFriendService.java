@@ -1,7 +1,10 @@
 package ru.denis.social_network.services;
 
 import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.denis.social_network.models.MyFriend;
 import ru.denis.social_network.models.MyUser;
@@ -25,23 +28,22 @@ public class MyFriendService {
     @Autowired
     private MyUserRepository myUserRepository;
 
-
-    public List<MyUser> getFriends(int userId) {
+    @Transactional
+    @Cacheable(value = "allFriends", key = "#userId")
+    public List<MyFriend> getFriends(int userId) {
         MyUser user = myUserRepository.findById(userId).orElse(null);
-
-        List<MyFriend> friends = myFriendRepository.findByUser(user);
-
-        return friends.stream().map(MyFriend::getFriend).collect(Collectors.toList());
+        return myFriendRepository.findByUser(user);
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "allFriends")
     public void deleteFriend(int user_id, int friendId) {
-        myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getById(user_id), myUserRepository.getById(friendId));
-        myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getById(friendId), myUserRepository.getById(user_id));
-        MyFriendRequest request =  myFriendRequestRepository.findBySenderAndReceiver(myUserRepository.getById(user_id), myUserRepository.getById(friendId));
+        myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getReferenceById(user_id), myUserRepository.getReferenceById(friendId));
+        myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getReferenceById(friendId), myUserRepository.getReferenceById(user_id));
+        MyFriendRequest request =  myFriendRequestRepository.findBySenderAndReceiver(myUserRepository.getReferenceById(user_id), myUserRepository.getReferenceById(friendId));
 
         if(request == null) {
-            request =  myFriendRequestRepository.findBySenderAndReceiver(myUserRepository.getById(friendId), myUserRepository.getById(user_id));
+            request =  myFriendRequestRepository.findBySenderAndReceiver(myUserRepository.getReferenceById(friendId), myUserRepository.getReferenceById(user_id));
         }
 
         request.setStatus("DECLINED");

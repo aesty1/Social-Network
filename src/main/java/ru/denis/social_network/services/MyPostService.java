@@ -2,7 +2,9 @@ package ru.denis.social_network.services;
 
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.denis.social_network.models.MyComment;
 import ru.denis.social_network.models.MyPost;
@@ -32,11 +34,13 @@ public class MyPostService {
     @Autowired
     private MyCommentService myCommentService;
 
-    MyPost getPostById(Long id) {
+    @Cacheable(value = "postById", key = "#id")
+    public MyPost getPostById(Long id) {
         return myPostRepository.getById(id);
     }
 
-    List<MyPost> getAllPosts() {
+    @Cacheable(value = "allPosts")
+    public List<MyPost> getAllPosts() {
         return myPostRepository.findAll();
     }
 
@@ -75,7 +79,9 @@ public class MyPostService {
                 commentsDtos,
                 new UserDto(
                         user.getId(),
-                        user.getName()
+                        user.getName(),
+                        user.getNickname(),
+                        user.getBio()
                 )
         );
     }

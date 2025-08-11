@@ -84,6 +84,9 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
+                    <a class="nav-link" th:href="@{/search}">Search</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link active" th:href="@{/me}">Profile</a>
                 </li>
                 <li class="nav-item">
@@ -95,9 +98,6 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/posts}">Posts</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="fas fa-cog"></i></a>
-                </li>
             </ul>
         </div>
     </div>
@@ -108,21 +108,28 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-2 text-center">
-                <div class="profile-avatar mb-3 mx-auto" >
+                <div class="profile-avatar mb-3 mx-auto">
                     <img width="200px" src="https://online-uslygi.ru/img/icon.png" alt="Profile">
                 </div>
             </div>
-            <div class="col-md-10">
-                <h1 class="display-5" th:text="${user.getName()}"></h1>
-                <p class="lead mb-0" th:text="${user.getBio()} ?: 'User hasn\'t added any information about themselves yet'"></p>
-                <div class="d-flex mt-3">
-                    <a th:href="@{/profile/edit}" class="btn btn-light me-2">
-                        <i class="fas fa-edit me-1"></i> Edit Profile
-                    </a>
-                    <a th:href="@{/profile/edit/password}" class="btn btn-light me-2">
-                        <i class="fas fa-edit me-1"></i> Change Password
-                    </a>
-                </div>
+            <div class="col-md-10 position-relative">
+                <h1 class="display-5 mb-1" th:text="${user.getName()}"></h1>
+                <p class="lead mb-3" th:text="${user.getBio()} ?: 'User hasn\'t added any information about themselves yet'"></p>
+
+                <form th:if="${existsChatByUsers}" class="top-0 end-0 mt-3 me-3" th:action="@{/api/chat/create}" method="post">
+                    <div>
+                        <div>
+                            <input type="hidden" name="user1Id" th:value="${me.getId()}">
+                        </div>
+                        <div>
+                            <input type="hidden" name="user2Id" th:value="${user.getId()}">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1" type="submit">Create Chat</button>
+                </form>
+                <a class="btn btn-outline-light btn-sm rounded-pill px-3 py-1" style="text-decoration: none" th:href="@{/api/chats}" th:unless="${existsChatByUsers}">Write a message
+                </a>
             </div>
         </div>
     </div>
@@ -152,9 +159,6 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" data-bs-toggle="tab" href="#subscribers">Followers</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#findFriends">Find Friends</a>
         </li>
     </ul>
 
@@ -189,8 +193,7 @@
 
                 <div th:if="${friends.isEmpty()}" class="col-12 text-center py-5">
                     <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
-                    <h4>You don't have any friends yet</h4>
-                    <p class="text-muted">Start adding friends using the "Find Friends" tab</p>
+                    <h4>Don't have any friends yet</h4>
                 </div>
             </div>
         </div>
@@ -217,41 +220,12 @@
 
                 <div th:if="${filteredFriends != null}" class="col-12 text-center py-5">
                     <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
-                    <h4>You don't have any followers yet</h4>
-                    <p class="text-muted">When someone sends you a friend request, it will appear here</p>
+                    <h4>Don't have any followers yet</h4>
                 </div>
             </div>
         </div>
 
-        <!-- Find Friends Tab -->
-        <div class="tab-pane fade" id="findFriends">
-            <h3 class="section-title">Find Friends</h3>
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="card form-card mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <i class="fas fa-user-plus me-2"></i> Send Friend Request
-                        </div>
-                        <div class="card-body">
-                            <form th:object="${users}" method="post" th:action="@{/friends/send}">
-                                <input type="hidden" name="sender_id" th:value="${user.getId()}">
-                                <div class="mb-3">
-                                    <label class="form-label">Select user:</label>
-                                    <select name="receiver_id" class="form-select">
-                                        <option th:each="eachUser : ${users}"
-                                                th:value="${eachUser.getId()}"
-                                                th:text="${eachUser.getName()}"></option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-paper-plane me-2"></i> Send Request
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 </div>
 

@@ -11,6 +11,7 @@ import ru.denis.social_network.jwts.JwtProvider;
 import ru.denis.social_network.models.MyChat;
 import ru.denis.social_network.models.MyMessage;
 import ru.denis.social_network.models.MyUser;
+import ru.denis.social_network.models.dto.ChatDto;
 import ru.denis.social_network.models.dto.CreateChatRequest;
 import ru.denis.social_network.services.MyChatService;
 import ru.denis.social_network.services.MyMessageService;
@@ -33,9 +34,13 @@ public class ChatController {
     private final MyUserService myUserService;
     private final MyMessageService myMessageService;
 
-    @PostMapping
-    public MyChat createChat(@Valid @RequestBody CreateChatRequest createChatRequest) {
-        return myChatService.createChat(createChatRequest.getParticipantIds());
+    @PostMapping("/chat/create")
+    public String createChat(@ModelAttribute("createChatRequest") @Valid CreateChatRequest createChatRequest) {
+        System.out.println(createChatRequest.getUser1Id());
+        System.out.println(createChatRequest.getUser2Id());
+        myChatService.createChat(createChatRequest.getUser1Id(), createChatRequest.getUser2Id());
+
+        return "redirect:/api/chats";
     }
 
 
@@ -49,12 +54,16 @@ public class ChatController {
 
     @GetMapping("/chat/{chatId}")
     public String getChat(@PathVariable @Min(1) int chatId, Model model, HttpServletRequest request) {
-        System.out.println();
-        model.addAttribute("chat", myChatService.getChatById(chatId));
+        ChatDto chat = myChatService.getChatDtoById(chatId);
+        model.addAttribute("chat", chat);
         model.addAttribute("messages", myMessageService.getMessagesSortedByTime(chatId));
 
-
+//        List<MyUser> users = myMessageService.getSendersByChatId(chatId);
+//
+//        model.addAttribute("sender_nickname", (Objects.equals(myMessageService.getSenderByChatId(chatId).getNickname(), myUserService.getUserById(getCurrentUserId(request)).getNickname())) ? myMessageService.getSenderByChatId(chatId).getNickname() : "me");
         model.addAttribute("currentUserId", getCurrentUserId(request));
+        model.addAttribute("recipId", (chat.getUser1_id() == getCurrentUserId(request)) ? chat.getUser2_id() : chat.getUser1_id());
+
         model.addAttribute("currentUser", myUserService.getUserById(getCurrentUserId(request)));
         model.addAttribute("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
 

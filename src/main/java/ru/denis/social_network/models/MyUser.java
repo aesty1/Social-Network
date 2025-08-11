@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import ru.denis.social_network.models.dto.FriendDto;
+
 import javax.validation.constraints.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +16,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-public class MyUser {
+public class MyUser implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -81,6 +86,14 @@ public class MyUser {
     public MyUser() {
     }
 
+    public List<MyFriend> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<MyFriend> friends) {
+        this.friends = friends;
+    }
+
     public int getId() {
         return id;
     }
@@ -105,10 +118,6 @@ public class MyUser {
         return posts;
     }
 
-    public List<MyFriend> getFriends() {
-        return friends;
-    }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -131,10 +140,6 @@ public class MyUser {
 
     public void setPosts(List<MyPost> posts) {
         this.posts = posts;
-    }
-
-    public void setFriends(List<MyFriend> friends) {
-        this.friends = friends;
     }
 
     public String getAvatar() {

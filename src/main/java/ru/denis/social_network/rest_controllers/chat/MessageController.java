@@ -21,6 +21,7 @@ public class MessageController {
         myMessageService.sendMessage(
                 request.getChatId(),
                 request.getSenderId(),
+                request.getRecipientId(),
                 request.getContent()
         );
     }

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search People</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .search-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .search-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .search-card:hover {
+            transform: translateY(-5px);
+        }
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #6c757d;
+        }
+        .section-title {
+            border-left: 4px solid #0d6efd;
+            padding-left: 12px;
+            margin: 25px 0 20px;
+        }
+        .search-form {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .search-results-container .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #6c757d;
+            flex-shrink: 0;
+        }
+
+        .search-results-container .actions {
+            min-width: 140px;
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .search-results-container .d-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-results-container .user-avatar {
+                margin-bottom: 15px;
+            }
+
+            .search-results-container .actions {
+                width: 100%;
+                margin-top: 15px;
+                text-align: left;
+            }
+
+            .search-results-container .actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-users me-2"></i>SocialNetwork
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/search}">Search</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/me}">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/friends}">Friends</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/api/chats}">Messages</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/posts}">Posts</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Search Header -->
+<div class="search-header">
+    <div class="container text-center">
+        <h1 class="display-5">Find People</h1>
+        <p class="lead">Search for friends and connect with them</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="search-form">
+                    <div class="input-group mb-3">
+                        <input id="person-name-input" type="text" class="form-control form-control-lg" placeholder="Enter name to search...">
+                        <button id="search-button" class="btn btn-primary" type="submit">
+                            <i class="fas fa-search me-1"></i> Search
+                        </button>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <h3 class="section-title">Search Results</h3>
+    <div id="search-results-container" class="search-results-container">
+        <div id="null-post"></div>
+    </div>
+
+
+</div>
+
+
+<script>
+    const postsContainer = document.getElementById('search-results-container');
+    const personNameInput = document.getElementById('person-name-input');
+    const searchButton = document.getElementById('search-button');
+
+    let stompClient = null;
+    let sessionId = null;
+
+    function showStatus(message) {
+        console.log(message);
+    }
+
+    searchButton.addEventListener('click', () => {
+        connect(personNameInput.value);
+    })
+
+    function connect(name) {
+        showStatus('Connecting to WebSocket...');
+
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            showStatus('Connected to WebSocket');
+
+            const match = /\/([^\/]+)\/websocket/.exec(socket._transport.url);
+            sessionId = match ? match[1] : 'unknown';
+            showStatus('Session ID: ' + sessionId);
+
+            // Подписываемся на топик ПЕРЕД отправкой сообщения
+            stompClient.subscribe('/topic/search/', function (response) {
+                console.log(JSON.parse(response.body)[0] == null)
+                if(JSON.parse(response.body)[0] == null) {
+                    renderNullPost();
+                } else {
+                    removePosts();
+                    for(let i = 0; i < JSON.parse(response.body).length; i++) {
+                        console.log(i);
+
+                        renderPost(JSON.parse(response.body)[i]);
+                    }
+
+
+                }
+
+            });
+            // Отправляем запрос
+            const message = {
+                name: name,
+                searchId: sessionId
+            };
+            stompClient.send("/app/search", {}, JSON.stringify(message));  // Отправляем в /app/search
+
+
+
+        });
+
+
+    }
+
+    function removePosts() {
+        const postElements = document.getElementsByClassName('post-card');
+        Array.from(postElements).forEach(element => {
+            element.remove();
+        });
+    }
+
+    function renderPost(post) {
+        const nullPost = document.getElementById("null-post");
+        nullPost.innerHTML = "";
+        const postElement = document.createElement('div');
+        postElement.className = "post-card";
+        postElement.innerHTML = `
+      <a class="card search-card mb-3" href="/user/${post.nickname}" style="text-decoration: none;">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-4">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-1">${post.name}</h5>
+                        <p class="card-text text-muted mb-1">@${post.nickname}</p>
+                        <p class="card-text">${post.bio}</p>
+                    </div>
+                </div>
+            </div>
+        </a>
+    `;
+
+        // Add the new post at the top of the container
+        postsContainer.appendChild(postElement);
+    }
+
+    function renderNullPost() {
+        const postElements = document.getElementsByClassName('post-card');
+        Array.from(postElements).forEach(element => {
+            element.remove();
+        });
+        const nullPost = document.getElementById("null-post");
+        nullPost.innerHTML = `
+      <div class="no-results text-center py-5">
+            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+            <h4>No users found</h4>
+            <p class="text-muted">Try adjusting your search query</p>
+        </div>
+    `;
+
+        // Add the new post at the top of the container
+        postsContainer.appendChild(nullPost);
+    }
+
+    // // Initialize connection
+    // window.onload = function() {
+    //     connect();
+    // };
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

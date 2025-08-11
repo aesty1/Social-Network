@@ -2,10 +2,8 @@ package ru.denis.social_network.controllers;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,13 +12,15 @@ import ru.denis.social_network.jwts.JwtProvider;
 import ru.denis.social_network.models.MyFriend;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.ChangePasswordDto;
+import ru.denis.social_network.models.dto.CreateChatRequest;
 import ru.denis.social_network.models.dto.MyFriendRequest;
 import ru.denis.social_network.models.dto.ProfileUpdateDto;
+import ru.denis.social_network.repositories.MyChatRepository;
 import ru.denis.social_network.services.MyFriendRequestService;
 import ru.denis.social_network.services.MyFriendService;
 import ru.denis.social_network.services.MyUserService;
+import ru.denis.social_network.services.RedisService;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,15 +40,22 @@ public class UserController {
 
     @Autowired
     private MyFriendRequestService myFriendRequestService;
+
     @Autowired
     private JwtProvider jwtProvider;
-    private SimpUserRegistry userRegistry;
+
+    @Autowired
+    private RedisService redisService;
+
+    @Autowired
+    private MyChatRepository myChatRepository;
 
     @GetMapping("/me")
     public String getProfile(Model model, HttpServletRequest request) {
 
+
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
-        List<MyUser> friends = myFriendService.getFriends(user.getId());
+        List<MyFriend> friends = myFriendService.getFriends(user.getId());
         model.addAttribute("user", user);
         model.addAttribute("friends", friends);
         model.addAttribute("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
@@ -65,14 +72,40 @@ public class UserController {
         }
 
 
-        return "users/getOne";
+        return "users/getMyProfile";
+    }
+
+    @GetMapping("/user/{nickname}")
+    public String getProfile(@PathVariable("nickname") String nickname, Model model, HttpServletRequest request) {
+        MyUser user = myUserService.getUserByNickname(nickname);
+        MyUser me = myUserService.getUserById(getCurrentUserId(request));
+
+        if(user.getId() == me.getId()) {
+            return "redirect:/me";
+        }
+
+        List<MyFriend> friends = myFriendService.getFriends(user.getId());
+        model.addAttribute("user", user);
+        model.addAttribute("me", me);
+        model.addAttribute("friends", friends);
+        model.addAttribute("createChatRequest", new CreateChatRequest());
+        System.out.println(myChatRepository.existsByUser1IdAndUser2Id(user.getId(), me.getId()));
+        if(!myChatRepository.existsByUser1IdAndUser2Id(me.getId(), user.getId()) && !myChatRepository.existsByUser1IdAndUser2Id(user.getId(), me.getId())) {
+            model.addAttribute("existsChatByUsers", true);
+        } else {
+            model.addAttribute("existsChatByUsers", false);
+        }
+
+
+        return "users/getOtherProfile";
     }
 
     @GetMapping("/friends")
     public String getFriends(Model model, HttpServletRequest request) {
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
 
-        model.addAttribute("friends", user.getFriends());
+        List<MyFriend> friends = myFriendService.getFriends(user.getId());
+        model.addAttribute("friends", friends);
 
         return "users/friends";
     }

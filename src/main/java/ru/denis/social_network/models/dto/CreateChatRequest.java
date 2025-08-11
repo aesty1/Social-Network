@@ -6,6 +6,6 @@ import java.util.Set;
 
 @Data
 public class CreateChatRequest {
-    private Set<Integer> participantIds;
-    private String name;
+    private int user1Id;
+    private int user2Id;
 }

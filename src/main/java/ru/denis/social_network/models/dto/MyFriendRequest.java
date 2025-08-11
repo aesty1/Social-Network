@@ -3,11 +3,13 @@ package ru.denis.social_network.models.dto;
 import jakarta.persistence.*;
 import ru.denis.social_network.models.MyUser;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "friend_requests")
-public class MyFriendRequest {
+public class MyFriendRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

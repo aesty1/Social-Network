@@ -13,7 +13,7 @@ import ru.denis.social_network.jwts.JwtProvider;
 import ru.denis.social_network.services.MyUserService;
 
 @Controller
-@RequestMapping("/home")
+@RequestMapping("/")
 public class HomeController {
 
     @Autowired
@@ -25,7 +25,7 @@ public class HomeController {
     @GetMapping()
     public String home(Model model) {
 
-        return "home";
+        return "redirect:/posts";
     }
 
 }

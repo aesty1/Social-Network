@@ -87,6 +87,9 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
+                    <a class="nav-link" th:href="@{/search}">Search</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" th:href="@{/me}">Profile</a>
                 </li>
                 <li class="nav-item">
@@ -97,9 +100,6 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/posts}">Posts</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="fas fa-cog"></i></a>
                 </li>
             </ul>
         </div>
@@ -122,8 +122,18 @@
             </div>
         </div>
     </div>
-    <div th:if="${friends.size() == 0}" class="friendsDiv">
-        You don't have any friends. :(
+    <div th:if="${friends.size() == 0}" class="friendsDiv text-center py-5">
+        <div class="card border-0 shadow-sm p-4" style="max-width: 400px; margin: 0 auto;">
+            <div class="mb-3">
+                <i class="fas fa-user-friends fa-4x text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">No Friends Yet</h3>
+            <p class="text-secondary">It looks like you haven't added any friends yet.</p>
+            <p class="text-secondary">Try searching for people to connect with!</p>
+            <a th:href="@{/search}" class="btn btn-primary mt-3">
+                <i class="fas fa-search me-2"></i>Find Friends
+            </a>
+        </div>
     </div>
 
     <!-- Bootstrap JS -->
