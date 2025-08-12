@@ -13,6 +13,7 @@ import java.util.List;
 
 @Service
 public class MyCommentService {
+    
     @Autowired
     private MyCommentRepository myCommentRepository;
 
@@ -21,7 +22,6 @@ public class MyCommentService {
 
     @Cacheable(value = "commentsByPostId", key = "#postId")
     public List<MyComment> getMyCommentsByPostId(int postId) {
-
         return myCommentRepository.findMyCommentsByPost(myPostRepository.getById(Long.valueOf(postId)));
     }
 
@@ -29,8 +29,6 @@ public class MyCommentService {
     public MyComment getCommentById(int id) {
         return myCommentRepository.getById(id);
     }
-
-
 
     @Cacheable(value = "allComments")
     public List<MyComment> getAllComments() {

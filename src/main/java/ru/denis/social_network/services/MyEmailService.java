@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MyEmailService {
+
     @Value("${app.email-confirmation.url}")
     private String confirmationUrl;
 
@@ -17,7 +18,6 @@ public class MyEmailService {
 
     public void sendConfirmationEmail(String to, String token) {
         String confirmationLink = confirmationUrl + "?token=" + token;
-        System.out.println(confirmationLink);
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -25,7 +25,6 @@ public class MyEmailService {
         message.setFrom("kadirovdenis0@gmail.com");
         message.setSubject("Register confirmation");
         message.setText("To complete the registration, please click the link below: " + confirmationLink);
-        System.out.println(message.toString());
         mailSender.send(message);
     }
 }

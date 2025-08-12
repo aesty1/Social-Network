@@ -22,17 +22,12 @@ import java.util.stream.Collectors;
 
 @Service
 public class MyPostService {
+
     @Autowired
     private MyPostRepository myPostRepository;
 
     @Autowired
-    private MyUserRepository myUserRepository;
-
-    @Autowired
     private MyCommentRepository myCommentRepository;
-
-    @Autowired
-    private MyCommentService myCommentService;
 
     @Cacheable(value = "postById", key = "#id")
     public MyPost getPostById(Long id) {
@@ -53,7 +48,6 @@ public class MyPostService {
         }
         return null;
     }
-
 
     private MyPost findNextPost(Long lastPostId) {
         if(lastPostId == null) {
@@ -85,7 +79,6 @@ public class MyPostService {
                 )
         );
     }
-
 
     public void incrementLikeCount(int postId) {
         myPostRepository.incrementLikeCount(postId);

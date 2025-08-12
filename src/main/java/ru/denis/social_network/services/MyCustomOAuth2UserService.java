@@ -16,7 +16,8 @@ import javax.validation.constraints.Size;
 @Service
 public class MyCustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final MyUserRepository myUserRepository;
+    @Autowired
+    private MyUserRepository myUserRepository;
 
     public MyCustomOAuth2UserService(MyUserRepository myUserRepository) {
         this.myUserRepository = myUserRepository;

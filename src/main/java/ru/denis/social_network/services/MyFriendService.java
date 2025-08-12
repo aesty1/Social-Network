@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.denis.social_network.models.MyFriend;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.FriendDto;
-import ru.denis.social_network.models.dto.MyFriendRequest;
+import ru.denis.social_network.models.requests.MyFriendRequest;
 import ru.denis.social_network.repositories.MyFriendRepository;
 import ru.denis.social_network.repositories.MyFriendRequestRepository;
 import ru.denis.social_network.repositories.MyUserRepository;
@@ -51,7 +51,7 @@ public class MyFriendService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "allFriends")
+    @CacheEvict(value = "allFriends")
     public void deleteFriend(int user_id, int friendId) {
         myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getReferenceById(user_id), myUserRepository.getReferenceById(friendId));
         myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getReferenceById(friendId), myUserRepository.getReferenceById(user_id));

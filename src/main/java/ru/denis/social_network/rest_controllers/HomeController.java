@@ -16,15 +16,8 @@ import ru.denis.social_network.services.MyUserService;
 @RequestMapping("/")
 public class HomeController {
 
-    @Autowired
-    private JwtProvider jwtProvider;
-
-    @Autowired
-    private MyUserService myUserService;
-
     @GetMapping()
     public String home(Model model) {
-
         return "redirect:/posts";
     }
 

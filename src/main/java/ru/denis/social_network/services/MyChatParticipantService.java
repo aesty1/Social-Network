@@ -2,6 +2,7 @@ package ru.denis.social_network.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +18,22 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MyChatParticipantService {
-    @Lazy
-    private final MyChatParticipantRepository chatParticipantRepository;
-    private final MyChatRepository chatRepository;
-    @Lazy
-    private final MyChatService myChatService;
-    private final MyUserService myUserService;
 
-    // Добавление участника в чат
+    @Lazy
+    @Autowired
+    private MyChatParticipantRepository chatParticipantRepository;
+
+    @Autowired
+    private MyChatRepository chatRepository;
+
+    @Lazy
+    @Autowired
+    private MyChatService myChatService;
+
+    @Autowired
+    private MyUserService myUserService;
+
+
     @Transactional
     public MyChatParticipant addParticipantToChat(MyChat chat, MyUser user) {
         MyChatParticipant participant = MyChatParticipant.builder()
@@ -38,11 +47,9 @@ public class MyChatParticipantService {
     public HashSet<MyChatParticipant> addParticipantsToChat(int chatId, HashSet<Integer> userIds) {
         HashSet<MyChatParticipant> addedParticipants = new HashSet<>();
 
-        // Получаем чат один раз
         MyChat chat = myChatService.getChatById(chatId);
 
         for (int userId : userIds) {
-            // Проверяем, не является ли пользователь уже участником
             if (!chatParticipantRepository.existsByChatAndUserId(myChatService.getChatById(chatId), userId)) {
                 MyUser user = myUserService.getUserById(userId);
 
@@ -54,23 +61,6 @@ public class MyChatParticipantService {
                 addedParticipants.add(chatParticipantRepository.save(participant));
             }
         }
-
         return addedParticipants;
     }
-
-
-
-    // Проверка является ли пользователь участником чата
-    public boolean isUserInChat(int chatId, int userId) {
-        return chatParticipantRepository.existsByChatAndUserId(myChatService.getChatById(chatId), userId);
-    }
-
-    // Получение всех участников чата
-    public List<MyChatParticipant> getChatParticipants(int chatId) {
-        return chatParticipantRepository.findAllByChat(chatRepository.getOne(chatId));
-    }
-
-
-
-
 }

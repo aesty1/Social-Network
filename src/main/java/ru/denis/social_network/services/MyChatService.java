@@ -2,6 +2,7 @@ package ru.denis.social_network.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -28,10 +29,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MyChatService {
-    private final MyChatRepository myChatRepository;
-    private final MyUserRepository myUserRepository;
+
+    @Autowired
+    private MyChatRepository myChatRepository;
+
+    @Autowired
+    private MyUserRepository myUserRepository;
+
     @Lazy
-    private final MyChatParticipantRepository myChatParticipantRepository;
+    @Autowired
+    private MyChatParticipantRepository myChatParticipantRepository;
 
 
     public boolean existsByUser1IdAndUser2Id(int user1Id, int user2Id) {
@@ -43,27 +50,22 @@ public class MyChatService {
             @CacheEvict(value = "chat", allEntries = true)
     })
     public MyChat createChat(int user1Id, int user2Id) {
-        // Проверка на попытку создать чат с самим собой
         if (user1Id == user2Id) {
             throw new IllegalArgumentException("Cannot create chat with yourself");
         }
 
-        // Упорядочиваем ID пользователей, чтобы user1Id всегда был меньше user2Id
         int lowerUserId = Math.min(user1Id, user2Id);
         int higherUserId = Math.max(user1Id, user2Id);
 
-        // Проверяем существование чата с такими участниками
         if (myChatRepository.existsByUser1IdAndUser2Id(lowerUserId, higherUserId)) {
             throw new IllegalStateException("Chat between these users already exists");
         }
 
-        // Получаем пользователей из базы
         MyUser user1 = myUserRepository.findById(lowerUserId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + lowerUserId + " not found"));
         MyUser user2 = myUserRepository.findById(higherUserId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + higherUserId + " not found"));
 
-        // Создаем и сохраняем чат
         MyChat chat = new MyChat();
         chat.setUser1(user1);
         chat.setUser2(user2);
@@ -71,14 +73,12 @@ public class MyChatService {
 
         MyChat savedChat = myChatRepository.save(chat);
 
-        // Добавляем участников
         addParticipantsToChatInternal(savedChat.getChatId(), lowerUserId, higherUserId);
 
         return savedChat;
     }
 
     private void addParticipantsToChatInternal(int chatId, int user1Id, int user2Id) {
-        // Обработка первого пользователя
         MyUser user1 = myUserRepository.findMyUserById(user1Id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + user1Id));
 
@@ -87,7 +87,6 @@ public class MyChatService {
         participant1.setUser(user1);
         myChatParticipantRepository.save(participant1);
 
-        // Обработка второго пользователя
         MyUser user2 = myUserRepository.findMyUserById(user2Id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + user2Id));
 
@@ -121,7 +120,6 @@ public class MyChatService {
                 .collect(Collectors.toList());
     }
 
-
 //    @Cacheable(value = "chatDto", key = "#chatId")
     public ChatDto getChatDtoById(int chatId) {
         MyChat chat = myChatRepository.findById(chatId).orElse(null);
@@ -141,5 +139,4 @@ public class MyChatService {
     public MyChat getChatById(int chatId) {
         return myChatRepository.findById(chatId).orElse(null);
     }
-
 }

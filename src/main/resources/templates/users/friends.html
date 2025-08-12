@@ -111,10 +111,10 @@
                 <div class="friend-avatar mx-auto mb-3">
                     <i class="fas fa-user"></i>
                 </div>
-                <h5 class="card-title" th:text="${friend.getFriend().getName()}"></h5>
-                <p class="card-text text-muted" th:text="${friend.getFriend().getNickname()}"></p>
+                <h5 class="card-title" th:text="${friend.getFriend_name()}"></h5>
+                <p class="card-text text-muted" th:text="${friend.getFriend_nickname()}"></p>
                 <div class="d-flex justify-content-center">
-                    <form th:method="post" th:action="@{/friends/remove/{id}(id=${friend.getFriend().getId()})}">
+                    <form th:method="post" th:action="@{/friends/remove/{id}(id=${friend.getFriend_id()})}">
                         <button type="submit" class="btn btn-outline-danger">Remove</button>
 
                     </form>

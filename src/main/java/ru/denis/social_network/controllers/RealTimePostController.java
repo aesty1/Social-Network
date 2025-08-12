@@ -2,6 +2,7 @@ package ru.denis.social_network.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -18,26 +19,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @Controller
 @RequiredArgsConstructor
 public class RealTimePostController {
-    private final SimpMessagingTemplate messagingTemplate;
-    private final MyPostService myPostService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private MyPostService myPostService;
+
     private final Map<String, Long> userLastPostIds = new ConcurrentHashMap<>();
-
-
 
     @MessageMapping("/posts.init")
     public void initSession(SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        log.info("Initializing session: {}", sessionId);
 
         try {
             PostDto post = myPostService.getNextPost(null);
-            log.info("Post retrieved: {}", post != null ? post.getId() : "NULL");
+
             messagingTemplate.convertAndSend(
                     "/topic/posts/" + sessionId,
                     post != null ? post : "NO_POSTS_AVAILABLE"
             );
         } catch (Exception e) {
             log.error("Error in initSession", e);
+
             messagingTemplate.convertAndSendToUser(
                     sessionId,
                     "/topic/errors",
@@ -54,8 +58,6 @@ public class RealTimePostController {
         try {
             Long lastPostId = lastPostIdStr;
 
-
-            log.info("Requesting next post for session: {}, lastPostId: {}", sessionId, lastPostId);
             userLastPostIds.put(sessionId, lastPostId);
             sendNextPost(sessionId);
         } catch (NumberFormatException e) {

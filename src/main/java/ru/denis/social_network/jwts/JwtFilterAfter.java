@@ -5,21 +5,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.denis.social_network.services.MyUserService;
 
 import java.io.IOException;
 
 @Configuration
 public class JwtFilterAfter extends OncePerRequestFilter {
-
-    @Autowired
-    private JwtProvider provider;
-
-    @Autowired
-    private MyUserService myUserService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

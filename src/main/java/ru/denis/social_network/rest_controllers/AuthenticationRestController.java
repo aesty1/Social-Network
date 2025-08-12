@@ -45,12 +45,9 @@ public class AuthenticationRestController {
 
     @PostMapping("/register")
     public RedirectView register(@Valid @ModelAttribute MyUser myUser) {
-
-
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
 
         myUserService.save(myUser);
-        System.out.println("babab");
 
         return new RedirectView("/login");
     }

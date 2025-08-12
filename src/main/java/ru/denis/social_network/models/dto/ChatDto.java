@@ -29,8 +29,4 @@ public class ChatDto implements Serializable {
     private LocalDateTime createdAt;
     private LocalDateTime lastMessageAt;
     private Set<MyMessage> messages = new HashSet<>();
-
-
-    //    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<MyChatParticipant> participants = new HashSet<>();
 }

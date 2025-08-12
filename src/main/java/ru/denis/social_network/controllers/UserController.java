@@ -4,27 +4,25 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.denis.social_network.jwts.JwtProvider;
-import ru.denis.social_network.models.MyFriend;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.*;
+import ru.denis.social_network.models.requests.CreateChatRequest;
+import ru.denis.social_network.models.requests.MyFriendRequest;
 import ru.denis.social_network.repositories.MyChatRepository;
 import ru.denis.social_network.services.MyFriendRequestService;
 import ru.denis.social_network.services.MyFriendService;
 import ru.denis.social_network.services.MyUserService;
-import ru.denis.social_network.services.RedisService;
 
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -44,35 +42,25 @@ public class UserController {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private RedisService redisService;
-
-    @Autowired
     private MyChatRepository myChatRepository;
 
     @GetMapping("/me")
     public String getProfile(Model model, HttpServletRequest request) {
-
-
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
         List<FriendDto> friends = myFriendService.getFriends(user.getId());
-
-
 
         model.addAttribute("user", user);
         model.addAttribute("friends", friends);
         model.addAttribute("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
 
-        System.out.println();
-        // Фильтруем только DECLINED и PENDING
         List<MyFriendRequest> filteredFriends = myFriendRequestService.findByReceiverAndStatus(user, "PENDING").stream()
                 .filter(f -> f.getSender().getId() != user.getId()).toList();
-        if(!filteredFriends.isEmpty()) {
 
+        if(!filteredFriends.isEmpty()) {
             model.addAttribute("filteredFriends", filteredFriends);
         } else {
             model.addAttribute("filteredFriends", new ArrayList<>());
         }
-
 
         return "users/getMyProfile";
     }
@@ -91,12 +79,12 @@ public class UserController {
         model.addAttribute("me", me);
         model.addAttribute("friends", friends);
         model.addAttribute("createChatRequest", new CreateChatRequest());
+
         if(!myChatRepository.existsByUser1IdAndUser2Id(me.getId(), user.getId()) && !myChatRepository.existsByUser1IdAndUser2Id(user.getId(), me.getId())) {
             model.addAttribute("existsChatByUsers", true);
         } else {
             model.addAttribute("existsChatByUsers", false);
         }
-
 
         return "users/getOtherProfile";
     }
@@ -104,8 +92,8 @@ public class UserController {
     @GetMapping("/friends")
     public String getFriends(Model model, HttpServletRequest request) {
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
-
         List<FriendDto> friends = myFriendService.getFriends(user.getId());
+
         model.addAttribute("friends", friends);
 
         return "users/friends";
@@ -156,8 +144,6 @@ public class UserController {
         }
 
         try {
-
-
             myUserService.updateProfile(getCurrentUserId(request), profileUpdateDto);
         } catch (Exception e) {
             e.printStackTrace();
@@ -182,7 +168,6 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-
     private int getCurrentUserId(HttpServletRequest request) {
         Optional<Cookie> cookie = Arrays.stream(request.getCookies())
                 .filter(cook -> "JWT_TOKEN".equals(cook.getName()))
@@ -192,10 +177,8 @@ public class UserController {
             return -1;
         }
         String username =  jwtProvider.extractUsername(cookie.get().getValue());
-
         MyUser user =  myUserService.getUserByUsername(username);
 
         return user.getId();
-
     }
 }

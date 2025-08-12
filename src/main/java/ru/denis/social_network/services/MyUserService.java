@@ -38,14 +38,12 @@ public class MyUserService implements UserDetailsService {
     private MyUserRepository myUserRepository;
 
     @Autowired
-    private MyFriendRepository myFriendRepository;
-
-    @Autowired
     @Lazy
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
     @Autowired
     private MyEmailService myEmailService;
 
@@ -71,9 +69,6 @@ public class MyUserService implements UserDetailsService {
         } else {
             messagingTemplate.convertAndSend("/topic/search/", new UserDto());
         }
-
-
-
     }
 
     @Override
@@ -88,7 +83,6 @@ public class MyUserService implements UserDetailsService {
         } else {
             throw new UsernameNotFoundException(email);
         }
-
     }
 
     @Caching(evict = {
@@ -107,7 +101,6 @@ public class MyUserService implements UserDetailsService {
         } else {
             throw new UsernameNotFoundException("User not found");
         }
-
     }
 
     @Cacheable(value = "userByUsername", key = "#username")
@@ -142,7 +135,6 @@ public class MyUserService implements UserDetailsService {
         myUserRepository.save(user);
 
         return true;
-
     }
 
     @Cacheable(value = "userByNickname", key = "#nickname")

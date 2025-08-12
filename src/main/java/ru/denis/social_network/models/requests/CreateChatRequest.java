@@ -1,8 +1,6 @@
-package ru.denis.social_network.models.dto;
+package ru.denis.social_network.models.requests;
 
 import lombok.Data;
-
-import java.util.Set;
 
 @Data
 public class CreateChatRequest {

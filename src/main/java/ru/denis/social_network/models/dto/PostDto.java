@@ -3,9 +3,6 @@ package ru.denis.social_network.models.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.denis.social_network.models.MyComment;
-import ru.denis.social_network.models.MyUser;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

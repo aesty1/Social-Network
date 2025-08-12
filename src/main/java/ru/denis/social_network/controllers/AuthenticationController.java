@@ -23,6 +23,7 @@ public class AuthenticationController {
         if(principal != null) {
             model.addAttribute("user", principal.getAttributes());
         }
+
         return "oauthRegister";
     }
 
