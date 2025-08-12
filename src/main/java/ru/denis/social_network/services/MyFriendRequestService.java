@@ -3,6 +3,7 @@ package ru.denis.social_network.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import ru.denis.social_network.models.MyFriend;
 import ru.denis.social_network.models.dto.MyFriendRequest;
@@ -25,7 +26,7 @@ public class MyFriendRequestService {
     @Autowired
     private MyFriendRepository myFriendRepository;
 
-    @CacheEvict(cacheNames = "byReceiverAndStatus")
+    @CacheEvict(value = "byReceiverAndStatus")
     public MyFriendRequest sendFriendRequest(int sender_id, int receiver_id) {
         MyUser sender = myUserRepository.findById(sender_id).orElse(null);
         MyUser receiver = myUserRepository.findById(receiver_id).orElse(null);
@@ -44,19 +45,22 @@ public class MyFriendRequestService {
 
     }
 
-    @CacheEvict(cacheNames = "byReceiverAndStatus")
+    @Caching(evict = {
+            @CacheEvict(value = "byReceiverAndStatus", allEntries = true),
+            @CacheEvict(value = "allFriends", allEntries = true)
+    })
     public void respondToFriendRequest(int request_id, boolean accept) {
         MyFriendRequest request = myFriendRequestRepository.findById(request_id).orElse(null);
 
         if (accept) {
             // Add friends in both directions
             MyFriend friendship1 = new MyFriend();
-//            friendship1.setUser(request.getSender());
+            friendship1.setUser(request.getSender());
             friendship1.setFriend(request.getReceiver());
             myFriendRepository.save(friendship1);
 
             MyFriend friendship2 = new MyFriend();
-//            friendship2.setUser(request.getReceiver());
+            friendship2.setUser(request.getReceiver());
             friendship2.setFriend(request.getSender());
             myFriendRepository.save(friendship2);
 

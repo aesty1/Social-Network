@@ -163,26 +163,14 @@
         <div class="tab-pane fade show active" id="friends">
             <h3 class="section-title">Friend Requests</h3>
             <div class="col">
-                <div th:each="friend : ${friend_requests}" class="col-lg-3 col-md-4 col-sm-6 mb-4" >
-                    <div class="card friend-card h-100" th:if="${friend.getStatus() == 'PENDING'}">
+                <div th:each="friend : ${friends}" class="col-lg-3 col-md-4 col-sm-6 mb-4" >
+                    <div class="card friend-card h-100">
                         <div class="card-body text-center">
                             <div class="friend-avatar mx-auto mb-3">
                                 <i class="fas fa-user"></i>
                             </div>
-                            <h5 class="card-title" th:text="${friend.getSender().getName()}"></h5>
-                            <p class="card-text text-muted" th:text="${friend.getSender().getNickname()}"></p>
-                            <div class="d-flex justify-content-center">
-                                <form th:method="post" th:action="@{/friends/respond/{id}(id=${friend.getId()})}">
-                                    <button type="submit" class="btn btn-sm btn-outline-primary me-2">
-                                        <i class="fas fa-envelope"></i>
-                                    </button>
-                                </form>
-                                <form th:method="post" th:action="@{/friends/cancel/{id}(id=${friend.getId()})}">
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-user-times"></i>
-                                    </button>
-                                </form>
-                            </div>
+                            <a th:href="@{/user/{id}(id=${friend.getFriend_nickname()})}" class="card-title" th:text="${friend.getFriend_name()}"></a>
+
                         </div>
                     </div>
                 </div>
@@ -199,7 +187,7 @@
         <div class="tab-pane fade" id="subscribers">
             <h3 class="section-title">Followers</h3>
             <div class="col">
-                <div th:each="request : ${friend_requests}" class="col-lg-4 col-md-6 mb-4">
+                <div th:each="request : ${filteredFriends}" class="col-lg-4 col-md-6 mb-4">
                     <div class="card" th:if="${request.getStatus() == 'PENDING' and request.getSender().getId() != user.getId()}">
                         <div class="card-body" >
                             <div class="d-flex align-items-center">
@@ -209,6 +197,18 @@
                                 <div>
                                     <h5 class="card-title mb-0" th:text="${request.getSender().getName()}"></h5>
                                     <p class="card-text text-muted" th:text="${request.getSender().getNickname()}"></p>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <form th:method="post" th:action="@{/friends/respond/{id}(id=${request.getId()})}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </form>
+                                    <form th:method="post" th:action="@{/friends/cancel/{id}(id=${request.getId()})}">
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-user-times"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

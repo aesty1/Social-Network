@@ -21,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.denis.social_network.jwts.JwtFilter;
 import ru.denis.social_network.jwts.JwtLogoutHandler;
+import ru.denis.social_network.services.MyCustomOAuth2UserService;
 import ru.denis.social_network.services.MyUserService;
 
 @Configuration
@@ -31,10 +32,12 @@ public class SecurityConfig {
 
     private final MyUserService myUserService;
     private final JwtFilter jwtFilter;
+    private final MyCustomOAuth2UserService myCustomOAuth2UserService;
 
-    public SecurityConfig(@Qualifier("myUserService") MyUserService myUserService, JwtFilter jwtFilter) {
+    public SecurityConfig(@Qualifier("myUserService") MyUserService myUserService, JwtFilter jwtFilter, MyCustomOAuth2UserService myCustomOAuth2UserService) {
         this.myUserService = myUserService;
         this.jwtFilter = jwtFilter;
+        this.myCustomOAuth2UserService = myCustomOAuth2UserService;
     }
 
     @Bean
@@ -48,6 +51,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/register", "/login", "/authenticate/**", "/js/**").permitAll()
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")  // Добавьте эту строку
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(myCustomOAuth2UserService)
+                        )
+                        .defaultSuccessUrl("/register-oauth", true)
                 )
 //                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

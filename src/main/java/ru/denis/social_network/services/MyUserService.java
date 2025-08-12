@@ -4,6 +4,7 @@ package ru.denis.social_network.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -86,7 +87,10 @@ public class MyUserService implements UserDetailsService {
 
     }
 
-    @CacheEvict(value = "allUsers", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "allUsers", allEntries = true),
+            @CacheEvict(value = "userById", allEntries = true)
+    })
     public void updateProfile(int id, ProfileUpdateDto profileUpdateDto) {
         MyUser user = myUserRepository.findMyUserById(id).orElse(null);
 

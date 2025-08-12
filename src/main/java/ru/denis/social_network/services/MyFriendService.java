@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.denis.social_network.models.MyFriend;
 import ru.denis.social_network.models.MyUser;
+import ru.denis.social_network.models.dto.FriendDto;
 import ru.denis.social_network.models.dto.MyFriendRequest;
 import ru.denis.social_network.repositories.MyFriendRepository;
 import ru.denis.social_network.repositories.MyFriendRequestRepository;
@@ -30,9 +31,23 @@ public class MyFriendService {
 
     @Transactional
     @Cacheable(value = "allFriends", key = "#userId")
-    public List<MyFriend> getFriends(int userId) {
+    public List<FriendDto> getFriends(int userId) {
         MyUser user = myUserRepository.findById(userId).orElse(null);
-        return myFriendRepository.findByUser(user);
+        List<MyFriend> friends = myFriendRepository.findByUser(user);
+
+        List<FriendDto> friendDtos = friends.stream()
+                .map(friend -> {
+                    FriendDto dto = new FriendDto();
+                    dto.setFriend_id(friend.getFriend().getId());
+                    dto.setFriend_name(friend.getFriend().getName());
+                    dto.setUser_id(friend.getUser().getId());
+                    dto.setUser_name(friend.getUser().getName());
+                    dto.setUser_nickname(friend.getUser().getNickname());
+                    dto.setFriend_nickname(friend.getFriend().getNickname());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return friendDtos;
     }
 
     @Transactional

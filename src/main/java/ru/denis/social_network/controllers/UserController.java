@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,10 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.denis.social_network.jwts.JwtProvider;
 import ru.denis.social_network.models.MyFriend;
 import ru.denis.social_network.models.MyUser;
-import ru.denis.social_network.models.dto.ChangePasswordDto;
-import ru.denis.social_network.models.dto.CreateChatRequest;
-import ru.denis.social_network.models.dto.MyFriendRequest;
-import ru.denis.social_network.models.dto.ProfileUpdateDto;
+import ru.denis.social_network.models.dto.*;
 import ru.denis.social_network.repositories.MyChatRepository;
 import ru.denis.social_network.services.MyFriendRequestService;
 import ru.denis.social_network.services.MyFriendService;
@@ -26,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -55,16 +54,19 @@ public class UserController {
 
 
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
-        List<MyFriend> friends = myFriendService.getFriends(user.getId());
+        List<FriendDto> friends = myFriendService.getFriends(user.getId());
+
+
+
         model.addAttribute("user", user);
         model.addAttribute("friends", friends);
         model.addAttribute("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
 
-
+        System.out.println();
         // Фильтруем только DECLINED и PENDING
         List<MyFriendRequest> filteredFriends = myFriendRequestService.findByReceiverAndStatus(user, "PENDING").stream()
                 .filter(f -> f.getSender().getId() != user.getId()).toList();
-        if(filteredFriends.size() > 0) {
+        if(!filteredFriends.isEmpty()) {
 
             model.addAttribute("filteredFriends", filteredFriends);
         } else {
@@ -84,12 +86,11 @@ public class UserController {
             return "redirect:/me";
         }
 
-        List<MyFriend> friends = myFriendService.getFriends(user.getId());
+        List<FriendDto> friends = myFriendService.getFriends(user.getId());
         model.addAttribute("user", user);
         model.addAttribute("me", me);
         model.addAttribute("friends", friends);
         model.addAttribute("createChatRequest", new CreateChatRequest());
-        System.out.println(myChatRepository.existsByUser1IdAndUser2Id(user.getId(), me.getId()));
         if(!myChatRepository.existsByUser1IdAndUser2Id(me.getId(), user.getId()) && !myChatRepository.existsByUser1IdAndUser2Id(user.getId(), me.getId())) {
             model.addAttribute("existsChatByUsers", true);
         } else {
@@ -104,7 +105,7 @@ public class UserController {
     public String getFriends(Model model, HttpServletRequest request) {
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
 
-        List<MyFriend> friends = myFriendService.getFriends(user.getId());
+        List<FriendDto> friends = myFriendService.getFriends(user.getId());
         model.addAttribute("friends", friends);
 
         return "users/friends";
