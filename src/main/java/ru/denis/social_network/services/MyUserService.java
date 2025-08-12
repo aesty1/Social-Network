@@ -26,6 +26,7 @@ import ru.denis.social_network.repositories.MyUserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -45,6 +46,9 @@ public class MyUserService implements UserDetailsService {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private MyEmailService myEmailService;
+
 
     public void getUserByName(String name, String search_id) {
         List<MyUser> users = myUserRepository.findByNameContainingIgnoreCase(name);
@@ -114,7 +118,31 @@ public class MyUserService implements UserDetailsService {
     }
 
     public void save(MyUser myUser) {
+        System.out.println("bab");
+        myUser.setEnabled(false);
+
+        String confirmationToken = UUID.randomUUID().toString();
+        myUser.setConfirmationToken(confirmationToken);
+
         myUserRepository.save(myUser);
+
+        myEmailService.sendConfirmationEmail(myUser.getEmail(), confirmationToken);
+    }
+
+    public boolean confirmUser(String confirmationToken) {
+        MyUser user = myUserRepository.findByConfirmationToken(confirmationToken).orElse(null);
+
+        if(user == null) {
+            return false;
+        }
+
+        user.setEnabled(true);
+        user.setConfirmationToken(null);
+
+        myUserRepository.save(user);
+
+        return true;
+
     }
 
     @Cacheable(value = "userByNickname", key = "#nickname")

@@ -59,6 +59,10 @@ public class MyUser implements Serializable {
     @Size(min = 3, max = 40)
     private String nickname;
 
+    private boolean enabled;
+
+    private String confirmationToken;
+
     @OneToMany(mappedBy = "user1")
     private Set<MyChat> chatsAsUser1 = new HashSet<>();
 
@@ -164,5 +168,21 @@ public class MyUser implements Serializable {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getConfirmationToken() {
+        return confirmationToken;
+    }
+
+    public void setConfirmationToken(String confirmationToken) {
+        this.confirmationToken = confirmationToken;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

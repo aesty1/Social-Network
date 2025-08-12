@@ -7,6 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -49,7 +50,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login")
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/register", "/login", "/authenticate/**", "/js/**").permitAll()
+                        .requestMatchers("/register", "/login", "/authenticate/**", "/js/**", "confirm-account").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

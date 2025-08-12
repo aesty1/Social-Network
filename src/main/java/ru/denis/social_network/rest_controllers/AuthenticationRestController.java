@@ -1,10 +1,8 @@
 package ru.denis.social_network.rest_controllers;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,10 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import ru.denis.social_network.jwts.JwtProvider;
 import ru.denis.social_network.models.MyUser;
@@ -50,11 +45,25 @@ public class AuthenticationRestController {
 
     @PostMapping("/register")
     public RedirectView register(@Valid @ModelAttribute MyUser myUser) {
+
+
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
 
         myUserService.save(myUser);
+        System.out.println("babab");
 
         return new RedirectView("/login");
+    }
+
+    @GetMapping("/confirm-account")
+    public ResponseEntity<String> confirmAccount(@RequestParam("token") String token) {
+        boolean isConfirmed = myUserService.confirmUser(token);
+
+        if(isConfirmed) {
+            return ResponseEntity.ok("Аккаунт успешно подтвержден");
+        } else {
+            return ResponseEntity.badRequest().body("Неверный токен подтверждения");
+        }
     }
 
     @PostMapping("/authenticate")

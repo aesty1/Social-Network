@@ -14,4 +14,5 @@ public interface MyUserRepository extends JpaRepository<MyUser, Integer> {
     Optional<MyUser> findMyUserById(int id);
     MyUser findMyUserByName(String name);
     List<MyUser> findByNameContainingIgnoreCase(String name);
+    Optional<MyUser> findByConfirmationToken(String confirmationToken);
 }
