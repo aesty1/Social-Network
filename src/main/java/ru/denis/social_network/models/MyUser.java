@@ -87,6 +87,14 @@ public class MyUser implements Serializable {
         this.nickname = nickname;
     }
 
+    public MyUser(int user_id, String email, String name, String password, String nickname) {
+        this.id = user_id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.nickname = nickname;
+    }
+
     public MyUser() {
     }
 

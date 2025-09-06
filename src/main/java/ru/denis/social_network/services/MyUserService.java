@@ -149,8 +149,6 @@ public class MyUserService implements UserDetailsService {
     }
 
     public void changePassword(ChangePasswordDto changePasswordDto, MyUser myUser) {
-        System.out.println(changePasswordDto.getOldPassword());
-        System.out.println(myUser.getPassword());
         if(!passwordEncoder.matches(changePasswordDto.getOldPassword(), myUser.getPassword())) {
             throw new BadCredentialsException("Wrong password");
         }
