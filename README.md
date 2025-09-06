@@ -62,7 +62,7 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/your-username/social-network.git
+git clone https://github.com/aesty1/Social-Network.git
 ```
 
 2. Запустите через Docker Compose:
