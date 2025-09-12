@@ -3,7 +3,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-application.properties
+
 
 
 ### STS ###
@@ -30,7 +30,6 @@ application.properties
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-C:\Users\user\IdeaProjects\Social-Network\src\main\resources\application.properties
-C:/Users/user/IdeaProjects/Social-Network/src/main/resources/application.properties
+
 ### VS Code ###
 .vscode/
