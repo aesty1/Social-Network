@@ -70,7 +70,17 @@ git clone https://github.com/aesty1/Social-Network.git
 docker-compose up -d
 ```
 
-3. Приложение будет доступно по адресу: `http://localhost:8080`
+3. Напишите команду:
+```bash
+docker cp backup2.sql postgres_db:/tmp/backup2.sql  
+```
+
+4. Напишите команду:
+```bash
+docker exec -it postgres_db psql -U postgres -d postgres -f /tmp/backup2.sql
+```
+
+5. Приложение будет доступно по адресу: `http://localhost:8080`
 
 ## 📦 Архитектура
 
