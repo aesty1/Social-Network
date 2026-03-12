@@ -31,13 +31,12 @@ services:
     volumes:
       - redis-data:/data
   app:
-    build: .
-    container_name: spring_app
+    image: aesty1/service:latest
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - "8083:8080"
+      - "5:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
       SPRING_DATASOURCE_USERNAME: postgres

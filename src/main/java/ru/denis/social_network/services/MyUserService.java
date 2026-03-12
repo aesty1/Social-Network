@@ -111,7 +111,6 @@ public class MyUserService implements UserDetailsService {
     }
 
     public void save(MyUser myUser) {
-        System.out.println("bab");
         myUser.setEnabled(false);
 
         String confirmationToken = UUID.randomUUID().toString();
