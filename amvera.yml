@@ -1,0 +1,11 @@
+meta:
+  environment: docker
+  toolchain:
+    name: docker
+    version: latest
+build:
+  dockerfile: Dockerfile
+run:
+  persistence:
+    - mountPath: /data # Если нужно сохранять файлы/логи
+      name: data-storage
