@@ -10,7 +10,7 @@
 #WORKDIR /app
 #COPY --from=build /app/target/social_network-0.0.1-SNAPSHOT.jar /app/social_network.jar
 #ENTRYPOINT ["java", "-jar", "social_network.jar"]
-FROM openjdk:21-oracle
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 # Принимаем путь к JAR через аргумент из GitHub Actions
 ARG JAR_FILE
