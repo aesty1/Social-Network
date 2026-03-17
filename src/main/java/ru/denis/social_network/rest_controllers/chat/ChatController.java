@@ -4,10 +4,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.denis.social_network.jwts.JwtProvider;
+import ru.denis.social_network.models.MyChat;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.ChatDto;
 import ru.denis.social_network.models.requests.CreateChatRequest;
@@ -18,6 +22,8 @@ import ru.denis.social_network.services.MyUserService;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -38,31 +44,50 @@ public class ChatController {
     private MyMessageService myMessageService;
 
     @PostMapping("/chat/create")
-    public String createChat(@ModelAttribute("createChatRequest") @Valid CreateChatRequest createChatRequest) {
-        myChatService.createChat(createChatRequest.getUser1Id(), createChatRequest.getUser2Id());
+    public ResponseEntity<Void> createChat(@RequestBody @Valid CreateChatRequest request) {
+        myChatService.createChat(request.getUser1Id(), request.getUser2Id());
 
-        return "redirect:/api/chats";
+        return ResponseEntity
+                .status(HttpStatus.SEE_OTHER)
+                .header(HttpHeaders.LOCATION, "/api/chats")
+                .build();
     }
 
     @GetMapping("/chats")
-    public String getAllChats(Model model, HttpServletRequest request) {
-        model.addAttribute("chats", myChatService.getUsersChats(getCurrentUserId(request)));
-        model.addAttribute("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
-        return "chats";
+    public ResponseEntity<?> getAllChats(Model model, HttpServletRequest request) {
+//        model.addAttribute("chats", myChatService.getUsersChats(getCurrentUserId(request)));
+//        model.addAttribute("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("chats", myChatService.getUsersChats(getCurrentUserId(request)));
+        response.put("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(response);
     }
 
     @GetMapping("/chat/{chatId}")
-    public String getChat(@PathVariable @Min(1) int chatId, Model model, HttpServletRequest request) {
+    public ResponseEntity<?> getChat(@PathVariable @Min(1) int chatId, Model model, HttpServletRequest request) {
         ChatDto chat = myChatService.getChatDtoById(chatId);
 
-        model.addAttribute("chat", chat);
-        model.addAttribute("messages", myMessageService.getMessagesSortedByTime(chatId));
-        model.addAttribute("currentUserId", getCurrentUserId(request));
-        model.addAttribute("recipId", (chat.getUser1_id() == getCurrentUserId(request)) ? chat.getUser2_id() : chat.getUser1_id());
-        model.addAttribute("currentUser", myUserService.getUserById(getCurrentUserId(request)));
-        model.addAttribute("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
+//        model.addAttribute("chat", chat);
+//        model.addAttribute("messages", myMessageService.getMessagesSortedByTime(chatId));
+//        model.addAttribute("currentUserId", getCurrentUserId(request));
+//        model.addAttribute("recipId", (chat.getUser1_id() == getCurrentUserId(request)) ? chat.getUser2_id() : chat.getUser1_id());
+//        model.addAttribute("currentUser", myUserService.getUserById(getCurrentUserId(request)));
+//        model.addAttribute("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
 
-        return "chat";
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("chat", chat);
+        response.put("messages", myMessageService.getMessagesSortedByTime(chatId));
+        response.put("currentUserId", getCurrentUserId(request));
+        response.put("recipId", (chat.getUser1_id() == getCurrentUserId(request)) ? chat.getUser2_id() : chat.getUser1_id());
+        response.put("currentUser", myUserService.getUserById(getCurrentUserId(request)));
+        response.put("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(response);
     }
 
     private int getCurrentUserId(HttpServletRequest request) {

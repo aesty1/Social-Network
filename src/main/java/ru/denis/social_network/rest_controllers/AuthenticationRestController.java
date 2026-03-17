@@ -3,6 +3,8 @@ package ru.denis.social_network.rest_controllers;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,17 +41,21 @@ public class AuthenticationRestController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/user")
-    public String user(@AuthenticationPrincipal OAuth2User principal) {
-        return "Hello, " + principal.getAttribute("name") + "!";
+    public ResponseEntity<?> user(@AuthenticationPrincipal OAuth2User principal) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Hello, " + principal.getAttribute("name") + "!");
     }
 
     @PostMapping("/register")
-    public RedirectView register(@Valid @ModelAttribute MyUser myUser) {
+    public ResponseEntity<?> register(@Valid @ModelAttribute MyUser myUser) {
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
 
         myUserService.save(myUser);
 
-        return new RedirectView("/login");
+        return ResponseEntity
+                .status(HttpStatus.OK) // Код 302
+                .header(HttpHeaders.LOCATION, "/login")
+                .build();
     }
 
     @GetMapping("/confirm-account")
@@ -57,14 +63,14 @@ public class AuthenticationRestController {
         boolean isConfirmed = myUserService.confirmUser(token);
 
         if(isConfirmed) {
-            return ResponseEntity.ok("Аккаунт успешно подтвержден");
+            return ResponseEntity.ok("Account successfully approved");
         } else {
-            return ResponseEntity.badRequest().body("Неверный токен подтверждения");
+            return ResponseEntity.badRequest().body("Error token");
         }
     }
 
     @PostMapping("/authenticate")
-    public RedirectView login(@Valid @ModelAttribute LoginForm loginForm, Model model, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @ModelAttribute LoginForm loginForm, Model model, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginForm.username(),
                 loginForm.password()
@@ -82,7 +88,10 @@ public class AuthenticationRestController {
 
             response.addCookie(cookie);
 
-            return new RedirectView("/me");
+            return ResponseEntity
+                    .status(HttpStatus.OK) // Код 302
+                    .header(HttpHeaders.LOCATION, "/me")
+                    .build();
         } else {
             throw new UsernameNotFoundException("Bad credentials");
         }

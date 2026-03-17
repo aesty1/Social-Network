@@ -1,6 +1,9 @@
 package ru.denis.social_network.rest_controllers.friends;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,16 +21,22 @@ public class FriendRequestController {
     private MyFriendRequestService myFriendRequestService;
 
     @PostMapping("/send")
-    public RedirectView send(@Valid @RequestParam int sender_id, @Valid @RequestParam int receiver_id) {
+    public ResponseEntity<?> send(@Valid @RequestParam int sender_id, @Valid @RequestParam int receiver_id) {
         myFriendRequestService.sendFriendRequest(sender_id, receiver_id);
 
-        return new RedirectView("/me");
+        return ResponseEntity
+                .status(HttpStatus.OK) // Код 302
+                .header(HttpHeaders.LOCATION, "/me")
+                .build();
     }
 
     @PostMapping("/respond")
-    public RedirectView respond(@Valid @RequestParam boolean accept, @Valid @RequestParam int request_id) {
+    public ResponseEntity<?> respond(@Valid @RequestParam boolean accept, @Valid @RequestParam int request_id) {
         myFriendRequestService.respondToFriendRequest(request_id, accept);
 
-        return new RedirectView("/me");
+        return ResponseEntity
+                .status(HttpStatus.OK) // Код 302
+                .header(HttpHeaders.LOCATION, "/login")
+                .build();
     }
 }

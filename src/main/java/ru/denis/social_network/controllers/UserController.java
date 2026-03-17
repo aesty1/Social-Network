@@ -3,6 +3,8 @@ package ru.denis.social_network.controllers;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,10 +21,7 @@ import ru.denis.social_network.services.MyFriendService;
 import ru.denis.social_network.services.MyUserService;
 
 import javax.validation.constraints.Min;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -45,102 +44,131 @@ public class UserController {
     private MyChatRepository myChatRepository;
 
     @GetMapping("/me")
-    public String getProfile(Model model, HttpServletRequest request) {
+    public ResponseEntity<?> getMyProfile(Model model, HttpServletRequest request) {
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
         List<FriendDto> friends = myFriendService.getFriends(user.getId());
 
-        model.addAttribute("user", user);
-        model.addAttribute("friends", friends);
-        model.addAttribute("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
+//        model.addAttribute("user", user);
+//        model.addAttribute("friends", friends);
+//        model.addAttribute("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
 
         List<MyFriendRequest> filteredFriends = myFriendRequestService.findByReceiverAndStatus(user, "PENDING").stream()
                 .filter(f -> f.getSender().getId() != user.getId()).toList();
 
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", user);
+        response.put("friends", friends);
+        response.put("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
         if(!filteredFriends.isEmpty()) {
-            model.addAttribute("filteredFriends", filteredFriends);
+            response.put("filteredFriends", filteredFriends);
         } else {
-            model.addAttribute("filteredFriends", new ArrayList<>());
+            response.put("filteredFriends", new ArrayList<>());
         }
 
-        return "users/getMyProfile";
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
 
     @GetMapping("/user/{nickname}")
-    public String getProfile(@PathVariable("nickname") String nickname, Model model, HttpServletRequest request) {
+    public ResponseEntity<?> getProfile(@PathVariable("nickname") String nickname, Model model, HttpServletRequest request) {
         MyUser user = myUserService.getUserByNickname(nickname);
         MyUser me = myUserService.getUserById(getCurrentUserId(request));
 
         if(user.getId() == me.getId()) {
-            return "redirect:/me";
+            return ResponseEntity
+                    .status(HttpStatus.FOUND) // Код 302
+                    .header(HttpHeaders.LOCATION, "/me")
+                    .build();
         }
 
         List<FriendDto> friends = myFriendService.getFriends(user.getId());
-        model.addAttribute("user", user);
-        model.addAttribute("me", me);
-        model.addAttribute("friends", friends);
-        model.addAttribute("createChatRequest", new CreateChatRequest());
+//        model.addAttribute("user", user);
+//        model.addAttribute("me", me);
+//        model.addAttribute("friends", friends);
+//        model.addAttribute("createChatRequest", new CreateChatRequest());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", user);
+        response.put("me", me);
+        response.put("friends", friends);
+        response.put("createChatRequest", new CreateChatRequest());
 
         if(!myChatRepository.existsByUser1IdAndUser2Id(me.getId(), user.getId()) && !myChatRepository.existsByUser1IdAndUser2Id(user.getId(), me.getId())) {
-            model.addAttribute("existsChatByUsers", true);
+            response.put("existsChatByUsers", true);
         } else {
-            model.addAttribute("existsChatByUsers", false);
+            response.put("existsChatByUsers", false);
         }
 
-        return "users/getOtherProfile";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(response);
     }
 
     @GetMapping("/friends")
-    public String getFriends(Model model, HttpServletRequest request) {
+    public ResponseEntity<?> getFriends(Model model, HttpServletRequest request) {
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
         List<FriendDto> friends = myFriendService.getFriends(user.getId());
 
-        model.addAttribute("friends", friends);
+//        model.addAttribute("friends", friends);
 
-        return "users/friends";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(friends);
     }
 
     @PostMapping("/friends/add/{id}")
-    public String addFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public ResponseEntity<?> addFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.sendFriendRequest(getCurrentUserId(request), id);
 
-        return "redirect:/me";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Friend add ok");
     }
 
     @PostMapping("/friends/remove/{id}")
-    public String remvoeFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public ResponseEntity<?> removeFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendService.deleteFriend(getCurrentUserId(request), id);
 
-        return "redirect:/me";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Remove friend ok");
     }
 
     @PostMapping("/friends/respond/{id}")
-    public String respondToFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public ResponseEntity<?> respondToFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.respondToFriendRequest(id, true);
 
-        return "redirect:/me";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Respond to friend ok");
     }
 
     @PostMapping("/friends/cancel/{id}")
-    public String respondToFriendCancel(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public ResponseEntity<?> respondToFriendCancel(@PathVariable @Min(1) int id, HttpServletRequest request) {
         myFriendRequestService.respondToFriendRequest(id, false);
 
-        return "redirect:/me";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Respond to friend cancel ok");
     }
 
     @GetMapping("/profile/edit")
-    public String showEditProfileForm(Model model, HttpServletRequest request) {
+    public ResponseEntity<?> showEditProfileForm(Model model, HttpServletRequest request) {
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
 
-        model.addAttribute("user", user);
-        model.addAttribute("profileUpdateDto", new ProfileUpdateDto(user.getNickname(), user.getName(), user.getBio()));
+//        model.addAttribute("user", user);
+//        model.addAttribute("profileUpdateDto", new ProfileUpdateDto(user.getNickname(), user.getName(), user.getBio()));
 
-        return "editProfile";
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("user", user);
+        response.put("profileUpdateDto", new ProfileUpdateDto(user.getNickname(), user.getName(), user.getBio()));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(response);
     }
 
     @PostMapping("/profile/edit/save")
-    public String saveProfile(@ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
+    public ResponseEntity<?> saveProfile(@ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
         if(result.hasErrors()) {
-            return "editProfile";
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body("Profile edit request has errors");
         }
 
         try {
@@ -149,23 +177,25 @@ public class UserController {
             e.printStackTrace();
         }
 
-        return "redirect:/me";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Profile saved");
     }
 
     @GetMapping("/profile/edit/password")
-    public String showEditPasswordForm(Model model) {
+    public ResponseEntity<?> showEditPasswordForm(Model model) {
         ChangePasswordDto changePasswordDto = new ChangePasswordDto();
-        model.addAttribute("changePasswordDto", changePasswordDto);
+//        model.addAttribute("changePasswordDto", changePasswordDto);
 
-        return "editPassword";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(changePasswordDto);
     }
 
     @PostMapping("/profile/edit/password/save")
     public ResponseEntity<?> changePassword(@ModelAttribute ChangePasswordDto changePasswordDto, HttpServletRequest request) {
-        System.out.println(changePasswordDto.getNewPassword());
         myUserService.changePassword(changePasswordDto, myUserService.getUserById(getCurrentUserId(request)));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Password successfully changed");
     }
 
     private int getCurrentUserId(HttpServletRequest request) {

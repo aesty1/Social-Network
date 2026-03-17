@@ -1,6 +1,8 @@
 package ru.denis.social_network.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,16 +28,19 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/comments")
-    public String comments(@PathVariable("postId") int postId, Model model) {
-        model.addAttribute("comments", myCommentService.getMyCommentsByPostId(postId));
+    public ResponseEntity<?> comments(@PathVariable("postId") int postId, Model model) {
+//        model.addAttribute("comments", myCommentService.getMyCommentsByPostId(postId));
 
-        return "comments";
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(myCommentService.getMyCommentsByPostId(postId));
     }
 
     @PostMapping("/{postId}/like")
-    public String like(@PathVariable("postId") int postId) {
+    public ResponseEntity<?> like(@PathVariable("postId") int postId) {
         myPostService.incrementLikeCount(postId);
 
-        return "redirect:/posts";
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("The like was placed successfully");
     }
 }
