@@ -165,7 +165,7 @@ public class UserController {
     }
 
     @PostMapping("/profile/edit/save")
-    public ResponseEntity<?> saveProfile(@ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
+    public ResponseEntity<?> saveProfile(@RequestBody ProfileUpdateDto profileUpdateDto, BindingResult result, HttpServletRequest request) {
         if(result.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body("Profile edit request has errors");
@@ -191,7 +191,7 @@ public class UserController {
     }
 
     @PostMapping("/profile/edit/password/save")
-    public ResponseEntity<?> changePassword(@ModelAttribute ChangePasswordDto changePasswordDto, HttpServletRequest request) {
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto, HttpServletRequest request) {
         myUserService.changePassword(changePasswordDto, myUserService.getUserById(getCurrentUserId(request)));
 
         return ResponseEntity.status(HttpStatus.OK)

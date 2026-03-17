@@ -47,7 +47,7 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @ModelAttribute MyUser myUser) {
+    public ResponseEntity<?> register(@Valid @RequestBody MyUser myUser) {
         myUser.setPassword(passwordEncoder.encode(myUser.getPassword()));
 
         myUserService.save(myUser);
@@ -70,7 +70,7 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> login(@Valid @ModelAttribute LoginForm loginForm, Model model, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginForm loginForm, Model model, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginForm.username(),
                 loginForm.password()
