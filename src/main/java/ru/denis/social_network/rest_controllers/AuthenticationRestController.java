@@ -24,6 +24,8 @@ import ru.denis.social_network.models.dto.LoginForm;
 import ru.denis.social_network.services.MyUserService;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class AuthenticationRestController {
@@ -70,30 +72,24 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginForm loginForm, Model model, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginForm loginForm) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginForm.username(),
                 loginForm.password()
         ));
 
         if(authentication.isAuthenticated()) {
+            // Генерируем токен
             String jwt = jwtProvider.createToken(myUserService.loadUserByUsername(loginForm.username()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            Cookie cookie = new Cookie("JWT_TOKEN", jwt);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(86400);
+            // Возвращаем JSON с токеном вместо куки и редиректа
+            Map<String, String> response = new HashMap<>();
+            response.put("token", jwt);
+            response.put("username", loginForm.username());
 
-            response.addCookie(cookie);
-
-            return ResponseEntity
-                    .status(HttpStatus.OK) // Код 302
-                    .header(HttpHeaders.LOCATION, "/me")
-                    .build();
+            return ResponseEntity.ok(response);
         } else {
-            throw new UsernameNotFoundException("Bad credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 
