@@ -1,5 +1,6 @@
 package ru.denis.social_network.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -43,9 +44,11 @@ public class MyUser implements Serializable {
     private LocalDateTime created_at = LocalDateTime.now();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<MyPost> posts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<MyFriend> friends;
 
     @Column(name = "avatar")
