@@ -110,6 +110,12 @@ public class MyUserService implements UserDetailsService {
         return user;
     }
 
+    @Cacheable(value = "userSearchResults", key = "#query")
+    public List<MyUser> searchUsers(String query) {
+        // Ищем и по имени, и по никнейму, чтобы поиск был гибким
+        return myUserRepository.findAllByNameContainingIgnoreCaseOrNicknameContainingIgnoreCase(query, query);
+    }
+
     public void save(MyUser myUser) {
         myUser.setEnabled(false);
 

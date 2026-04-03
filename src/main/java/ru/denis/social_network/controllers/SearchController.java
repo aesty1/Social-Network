@@ -7,8 +7,12 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.UserDto;
 import ru.denis.social_network.services.MyUserService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class SearchController {
@@ -23,10 +27,20 @@ public class SearchController {
 
     @MessageMapping("/search")
     @SendTo("/topic/search")
-    public void sendMessage(@Payload UserDto user, SimpMessageHeaderAccessor headerAccessor) {
-        String sessionId = headerAccessor.getSessionId();
+    public List<UserDto> sendMessage(@Payload UserDto searchRequest) {
+        // 1. Предположим, твой сервис возвращает List<MyUser>
+        // Если метод называется иначе, подправь название
+        List<MyUser> foundUsers = myUserService.searchUsers(searchRequest.getName());
 
-        myUserService.getUserByName(user.getName(), sessionId);
+        // 2. Маппим MyUser -> UserDto прямо здесь
+        return foundUsers.stream().map(user -> {
+            UserDto dto = new UserDto();
+            dto.setId(user.getId());
+            dto.setName(user.getName());
+            dto.setNickname(user.getNickname());
+            dto.setBio(user.getBio());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
 }

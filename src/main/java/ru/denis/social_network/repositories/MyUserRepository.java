@@ -14,4 +14,6 @@ public interface MyUserRepository extends JpaRepository<MyUser, Integer> {
     Optional<MyUser> findMyUserById(int id);
     List<MyUser> findByNameContainingIgnoreCase(String name);
     Optional<MyUser> findByConfirmationToken(String confirmationToken);
+    // Ищет всех пользователей, у которых имя содержит поисковую строку (без учета регистра)
+    List<MyUser> findAllByNameContainingIgnoreCaseOrNicknameContainingIgnoreCase(String name, String nickname);
 }
