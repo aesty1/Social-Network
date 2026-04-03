@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class FriendDto implements Serializable {
     private static final long serialVersionUID = 1L;
-    private int id;
-    private int user_id;
+    private Long id;
+    private Long user_id;
     private String user_name;
     private String user_nickname;
-    private int friend_id;
+    private Long friend_id;
     private String friend_name;
     private String friend_nickname;
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -44,12 +44,12 @@ public class MyChatParticipantService {
     }
 
     @Transactional
-    public HashSet<MyChatParticipant> addParticipantsToChat(int chatId, HashSet<Integer> userIds) {
+    public HashSet<MyChatParticipant> addParticipantsToChat(int chatId, HashSet<Long> userIds) {
         HashSet<MyChatParticipant> addedParticipants = new HashSet<>();
 
         MyChat chat = myChatService.getChatById(chatId);
 
-        for (int userId : userIds) {
+        for (Long userId : userIds) {
             if (!chatParticipantRepository.existsByChatAndUserId(myChatService.getChatById(chatId), userId)) {
                 MyUser user = myUserService.getUserById(userId);
 

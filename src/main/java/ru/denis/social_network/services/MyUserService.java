@@ -89,7 +89,7 @@ public class MyUserService implements UserDetailsService {
             @CacheEvict(value = "allUsers", allEntries = true),
             @CacheEvict(value = "userById", allEntries = true)
     })
-    public void updateProfile(int id, ProfileUpdateDto profileUpdateDto) {
+    public void updateProfile(Long id, ProfileUpdateDto profileUpdateDto) {
         MyUser user = myUserRepository.findMyUserById(id).orElse(null);
 
         if(user != null) {
@@ -175,7 +175,7 @@ public class MyUserService implements UserDetailsService {
 
     @Cacheable(value = "userById", key = "#id")
     @Transactional
-    public MyUser getUserById(int id) {
+    public MyUser getUserById(Long id) {
         return myUserRepository.findMyUserById(id).orElse(null);
     }
 }

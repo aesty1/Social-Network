@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public class MessageDTO {
     private int id;
     private int chatId;
-    private int senderId;
+    private Long senderId;
     private String senderNickname;
     private String content;
     private LocalDateTime sentAt;

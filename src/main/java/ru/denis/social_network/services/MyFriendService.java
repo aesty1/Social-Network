@@ -31,7 +31,7 @@ public class MyFriendService {
 
     @Transactional
     @Cacheable(value = "allFriends", key = "#userId")
-    public List<FriendDto> getFriends(int userId) {
+    public List<FriendDto> getFriends(Long userId) {
         MyUser user = myUserRepository.findById(userId).orElse(null);
         List<MyFriend> friends = myFriendRepository.findByUser(user);
 
@@ -52,7 +52,7 @@ public class MyFriendService {
 
     @Transactional
     @CacheEvict(value = "allFriends")
-    public void deleteFriend(int user_id, int friendId) {
+    public void deleteFriend(Long user_id, Long friendId) {
         myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getReferenceById(user_id), myUserRepository.getReferenceById(friendId));
         myFriendRepository.deleteAllByUserAndFriend(myUserRepository.getReferenceById(friendId), myUserRepository.getReferenceById(user_id));
         MyFriendRequest request =  myFriendRequestRepository.findBySenderAndReceiver(myUserRepository.getReferenceById(user_id), myUserRepository.getReferenceById(friendId));

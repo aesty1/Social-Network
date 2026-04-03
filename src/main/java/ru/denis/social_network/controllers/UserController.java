@@ -117,7 +117,7 @@ public class UserController {
     }
 
     @PostMapping("/friends/add/{id}")
-    public ResponseEntity<?> addFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public ResponseEntity<?> addFriend(@PathVariable @Min(1) Long id, HttpServletRequest request) {
         myFriendRequestService.sendFriendRequest(getCurrentUserId(request), id);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -125,7 +125,7 @@ public class UserController {
     }
 
     @PostMapping("/friends/remove/{id}")
-    public ResponseEntity<?> removeFriend(@PathVariable @Min(1) int id, HttpServletRequest request) {
+    public ResponseEntity<?> removeFriend(@PathVariable @Min(1) Long id, HttpServletRequest request) {
         myFriendService.deleteFriend(getCurrentUserId(request), id);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -198,7 +198,7 @@ public class UserController {
                 .body("Password successfully changed");
     }
 
-    private int getCurrentUserId(HttpServletRequest request) {
+    private Long getCurrentUserId(HttpServletRequest request) {
         String token = null;
 
         // 1. Пытаемся достать токен из заголовка Authorization (для Android)
@@ -218,7 +218,7 @@ public class UserController {
 
         // 3. Если токена нет нигде — возвращаем -1 (ошибка авторизации)
         if (token == null) {
-            return -1;
+            return -1L;
         }
 
         try {
@@ -229,7 +229,7 @@ public class UserController {
             return (user != null) ? user.getId() : -1;
         } catch (Exception e) {
             // Если токен просрочен или "кривой"
-            return -1;
+            return -1L;
         }
     }
 }

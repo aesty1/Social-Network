@@ -41,7 +41,7 @@ public class MyChatService {
     private MyChatParticipantRepository myChatParticipantRepository;
 
 
-    public boolean existsByUser1IdAndUser2Id(int user1Id, int user2Id) {
+    public boolean existsByUser1IdAndUser2Id(Long user1Id, Long user2Id) {
         return myChatRepository.existsByUser1IdAndUser2Id(user1Id, user2Id);
     }
 
@@ -49,13 +49,13 @@ public class MyChatService {
             @CacheEvict(value = "usersChats", allEntries = true),
             @CacheEvict(value = "chat", allEntries = true)
     })
-    public MyChat createChat(int user1Id, int user2Id) {
+    public MyChat createChat(Long user1Id, Long user2Id) {
         if (user1Id == user2Id) {
             throw new IllegalArgumentException("Cannot create chat with yourself");
         }
 
-        int lowerUserId = Math.min(user1Id, user2Id);
-        int higherUserId = Math.max(user1Id, user2Id);
+        Long lowerUserId = Math.min(user1Id, user2Id);
+        Long higherUserId = Math.max(user1Id, user2Id);
 
         if (myChatRepository.existsByUser1IdAndUser2Id(lowerUserId, higherUserId)) {
             throw new IllegalStateException("Chat between these users already exists");
@@ -78,7 +78,7 @@ public class MyChatService {
         return savedChat;
     }
 
-    private void addParticipantsToChatInternal(int chatId, int user1Id, int user2Id) {
+    private void addParticipantsToChatInternal(int chatId, Long user1Id, Long user2Id) {
         MyUser user1 = myUserRepository.findMyUserById(user1Id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + user1Id));
 
@@ -98,7 +98,7 @@ public class MyChatService {
 
     @Cacheable(value = "usersChats", key = "#userId")
     @Transactional()
-    public List<ChatDto> getUsersChats(int userId) {
+    public List<ChatDto> getUsersChats(Long userId) {
         MyUser user = myUserRepository.findMyUserById(userId).orElse(null);
         if (user == null) {
             return Collections.emptyList();

@@ -90,7 +90,7 @@ public class ChatController {
                 .body(response);
     }
 
-    private int getCurrentUserId(HttpServletRequest request) {
+    private Long getCurrentUserId(HttpServletRequest request) {
         String token = null;
 
         // 1. Пытаемся достать токен из заголовка Authorization (для Android)
@@ -110,7 +110,7 @@ public class ChatController {
 
         // 3. Если токена нет нигде — возвращаем -1 (ошибка авторизации)
         if (token == null) {
-            return -1;
+            return -1L;
         }
 
         try {
@@ -118,10 +118,10 @@ public class ChatController {
             String username = jwtProvider.extractUsername(token);
             MyUser user = myUserService.getUserByUsername(username);
 
-            return (user != null) ? user.getId() : -1;
+            return (user != null) ? user.getId() : -1L;
         } catch (Exception e) {
             // Если токен просрочен или "кривой"
-            return -1;
+            return -1L;
         }
     }
 }

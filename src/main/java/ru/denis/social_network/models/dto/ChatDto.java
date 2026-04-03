@@ -24,8 +24,8 @@ public class ChatDto implements Serializable {
     private int chatId;
     private String user1_name;
     private String user2_name;
-    private int user1_id;
-    private int user2_id;
+    private Long user1_id;
+    private Long user2_id;
     private LocalDateTime createdAt;
     private LocalDateTime lastMessageAt;
     private Set<MyMessage> messages = new HashSet<>();

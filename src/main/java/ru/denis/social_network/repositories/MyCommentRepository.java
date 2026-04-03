@@ -8,6 +8,6 @@ import ru.denis.social_network.models.MyPost;
 import java.util.List;
 
 @Repository
-public interface MyCommentRepository extends JpaRepository<MyComment, Integer> {
+public interface MyCommentRepository extends JpaRepository<MyComment, Long> {
     List<MyComment> findMyCommentsByPost(MyPost post);
 }

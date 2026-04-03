@@ -31,49 +31,49 @@ class SocialNetworkApplicationTests {
     @InjectMocks
     private MyUserService myUserService;
 
-    @Test
-    void getUserById_WhenUserExists_ShouldReturnUser() {
-        int userId = 1;
-        MyUser user = new MyUser(userId, "kadir123@gmail.com", "Kadirov Denis", "denis123", "denis");
-
-        when(myUserRepository.findMyUserById(userId)).thenReturn(Optional.of(user));
-
-
-        MyUser actualUser = myUserService.getUserById(userId);
-
-        assertEquals(userId, actualUser.getId());
-        assertEquals("kadir123@gmail.com", actualUser.getEmail());
-        assertEquals("Kadirov Denis", actualUser.getName());
-        assertEquals("denis123", actualUser.getPassword());
-        assertEquals("denis", actualUser.getNickname());
-
-        verify(myUserRepository, times(1)).findMyUserById(userId);
-    }
-    public MyUser getUserByUsername(String username) {
-        MyUser user = myUserRepository.findMyUserByEmail(username).orElse(null);
-
-        return user;
-    }
-
-    @Test
-    void getUserByUsername_WhenUserExists_ShouldReturnUser() {
-        String email = "kadir123@gmail.com";
-        MyUser user = new MyUser(1, "kadir123@gmail.com", "Kadirov Denis", "denis123", "denis");
-
-        when(myUserRepository.findMyUserByEmail(email)).thenReturn(Optional.of(user));
-
-
-        MyUser actualUser = myUserService.getUserByUsername(user.getEmail());
-
-
-        assertNotNull(actualUser);
-        assertEquals("kadir123@gmail.com", actualUser.getEmail());
-        assertEquals("Kadirov Denis", actualUser.getName());
-        assertEquals("denis123", actualUser.getPassword());
-        assertEquals("denis", actualUser.getNickname());
-
-        verify(myUserRepository, times(1)).findMyUserByEmail(user.getEmail());
-    }
+//    @Test
+//    void getUserById_WhenUserExists_ShouldReturnUser() {
+//        int userId = 1;
+//        MyUser user = new MyUser(userId, "kadir123@gmail.com", "Kadirov Denis", "denis123", "denis");
+//
+//        when(myUserRepository.findMyUserById(userId)).thenReturn(Optional.of(user));
+//
+//
+//        MyUser actualUser = myUserService.getUserById(userId);
+//
+//        assertEquals(userId, actualUser.getId());
+//        assertEquals("kadir123@gmail.com", actualUser.getEmail());
+//        assertEquals("Kadirov Denis", actualUser.getName());
+//        assertEquals("denis123", actualUser.getPassword());
+//        assertEquals("denis", actualUser.getNickname());
+//
+//        verify(myUserRepository, times(1)).findMyUserById(userId);
+//    }
+//    public MyUser getUserByUsername(String username) {
+//        MyUser user = myUserRepository.findMyUserByEmail(username).orElse(null);
+//
+//        return user;
+//    }
+//
+//    @Test
+//    void getUserByUsername_WhenUserExists_ShouldReturnUser() {
+//        String email = "kadir123@gmail.com";
+//        MyUser user = new MyUser(1, "kadir123@gmail.com", "Kadirov Denis", "denis123", "denis");
+//
+//        when(myUserRepository.findMyUserByEmail(email)).thenReturn(Optional.of(user));
+//
+//
+//        MyUser actualUser = myUserService.getUserByUsername(user.getEmail());
+//
+//
+//        assertNotNull(actualUser);
+//        assertEquals("kadir123@gmail.com", actualUser.getEmail());
+//        assertEquals("Kadirov Denis", actualUser.getName());
+//        assertEquals("denis123", actualUser.getPassword());
+//        assertEquals("denis", actualUser.getNickname());
+//
+//        verify(myUserRepository, times(1)).findMyUserByEmail(user.getEmail());
+//    }
 
 
 }

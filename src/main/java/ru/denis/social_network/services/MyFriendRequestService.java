@@ -27,7 +27,7 @@ public class MyFriendRequestService {
     private MyFriendRepository myFriendRepository;
 
     @CacheEvict(value = "byReceiverAndStatus")
-    public MyFriendRequest sendFriendRequest(int sender_id, int receiver_id) {
+    public MyFriendRequest sendFriendRequest(Long sender_id, Long receiver_id) {
         MyUser sender = myUserRepository.findById(sender_id).orElse(null);
         MyUser receiver = myUserRepository.findById(receiver_id).orElse(null);
 

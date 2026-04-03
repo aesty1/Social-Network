@@ -8,6 +8,6 @@ import ru.denis.social_network.models.MyChatParticipant;
 import java.util.List;
 
 public interface MyChatParticipantRepository extends JpaRepository<MyChatParticipant, ChatParticipantId> {
-    boolean existsByChatAndUserId(MyChat chat, int userId);
+    boolean existsByChatAndUserId(MyChat chat, Long userId);
     List<MyChatParticipant> findAllByChat(MyChat chat);
 }

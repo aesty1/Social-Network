@@ -28,7 +28,7 @@ public class MyCommentService {
     }
 
     @Cacheable(value = "comment", key = "#id")
-    public MyComment getCommentById(int id) {
+    public MyComment getCommentById(Long id) {
         return myCommentRepository.getById(id);
     }
 

@@ -11,5 +11,5 @@ import java.util.Optional;
 @Repository
 public interface MyChatRepository extends JpaRepository<MyChat, Integer> {
     List<MyChat> findAllByUser1_OrUser2(MyUser user1, MyUser user2);
-    boolean existsByUser1IdAndUser2Id(int user1Id, int user2Id);
+    boolean existsByUser1IdAndUser2Id(Long user1Id, Long user2Id);
 }

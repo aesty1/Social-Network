@@ -12,7 +12,7 @@ public class MyFriendRequest implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
@@ -31,11 +31,11 @@ public class MyFriendRequest implements Serializable {
     public MyFriendRequest() {
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

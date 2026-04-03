@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MyUserRepository extends JpaRepository<MyUser, Integer> {
+public interface MyUserRepository extends JpaRepository<MyUser, Long> {
     Optional<MyUser> findMyUserByEmail(String email);
     Optional<MyUser> findMyUserByNickname(String nickname);
-    Optional<MyUser> findMyUserById(int id);
+    Optional<MyUser> findMyUserById(Long id);
     List<MyUser> findByNameContainingIgnoreCase(String name);
     Optional<MyUser> findByConfirmationToken(String confirmationToken);
     // Ищет всех пользователей, у которых имя содержит поисковую строку (без учета регистра)

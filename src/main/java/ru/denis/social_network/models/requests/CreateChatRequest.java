@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class CreateChatRequest {
-    private int user1Id;
-    private int user2Id;
+    private Long user1Id;
+    private Long user2Id;
 }

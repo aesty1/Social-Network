@@ -59,7 +59,7 @@ public class MyMessageService {
 
     @Transactional
     @CacheEvict(value = "messagesSortedByTime", allEntries = true)
-    public void sendMessage(int chatId, int senderId, int recipientId, String content) {
+    public void sendMessage(int chatId, Long senderId, Long recipientId, String content) {
         MyChat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found"));
 

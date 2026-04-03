@@ -21,7 +21,7 @@ public class FriendRequestController {
     private MyFriendRequestService myFriendRequestService;
 
     @PostMapping("/send")
-    public ResponseEntity<?> send(@Valid @RequestParam int sender_id, @Valid @RequestParam int receiver_id) {
+    public ResponseEntity<?> send(@Valid @RequestParam Long sender_id, @Valid @RequestParam Long receiver_id) {
         myFriendRequestService.sendFriendRequest(sender_id, receiver_id);
 
         return ResponseEntity
