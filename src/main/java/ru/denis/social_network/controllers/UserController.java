@@ -199,16 +199,37 @@ public class UserController {
     }
 
     private int getCurrentUserId(HttpServletRequest request) {
-        Optional<Cookie> cookie = Arrays.stream(request.getCookies())
-                .filter(cook -> "JWT_TOKEN".equals(cook.getName()))
-                .findFirst();
+        String token = null;
 
-        if(cookie == null || !cookie.isPresent()) {
+        // 1. Пытаемся достать токен из заголовка Authorization (для Android)
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        }
+
+        // 2. Если в заголовке нет, пытаемся достать из Cookies (для браузера/Thymeleaf)
+        if (token == null && request.getCookies() != null) {
+            token = Arrays.stream(request.getCookies())
+                    .filter(cook -> "JWT_TOKEN".equals(cook.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        // 3. Если токена нет нигде — возвращаем -1 (ошибка авторизации)
+        if (token == null) {
             return -1;
         }
-        String username =  jwtProvider.extractUsername(cookie.get().getValue());
-        MyUser user =  myUserService.getUserByUsername(username);
 
-        return user.getId();
+        try {
+            // Используем твой jwtProvider для получения имени
+            String username = jwtProvider.extractUsername(token);
+            MyUser user = myUserService.getUserByUsername(username);
+
+            return (user != null) ? user.getId() : -1;
+        } catch (Exception e) {
+            // Если токен просрочен или "кривой"
+            return -1;
+        }
     }
 }
