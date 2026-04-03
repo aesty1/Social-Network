@@ -1,8 +1,6 @@
 package ru.denis.social_network.services;
 
 import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
-import org.hibernate.annotations.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -14,9 +12,7 @@ import ru.denis.social_network.models.dto.PostDto;
 import ru.denis.social_network.models.dto.UserDto;
 import ru.denis.social_network.repositories.MyCommentRepository;
 import ru.denis.social_network.repositories.MyPostRepository;
-import ru.denis.social_network.repositories.MyUserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +27,7 @@ public class MyPostService {
 
     @Cacheable(value = "postById", key = "#id")
     public MyPost getPostById(Long id) {
-        return myPostRepository.getById(id);
+        return myPostRepository.findById(id).orElse(null);
     }
 
     @Cacheable(value = "allPosts")
@@ -39,36 +35,46 @@ public class MyPostService {
         return myPostRepository.findAll();
     }
 
-    @Transactional()
+    @Transactional
     public PostDto getNextPost(Long lastPostId) {
-        MyPost myPost = findNextPost(lastPostId);
+        MyPost nextPostEntity;
 
-        if (myPost != null) {
-            return convertToDto(myPost);
+        if (lastPostId == null || lastPostId == 0) {
+            // Берем самый свежий пост
+            nextPostEntity = myPostRepository.findFirstByOrderByCreatedAtDesc().orElse(null);
+        } else {
+            // Ищем пост-ориентир
+            MyPost lastPost = myPostRepository.findById(lastPostId).orElse(null);
+
+            if (lastPost != null) {
+                // Ищем пост, созданный ДО (Before) времени этого поста
+                nextPostEntity = myPostRepository.findFirstByCreatedAtBeforeOrderByCreatedAtDesc(lastPost.getCreatedAt()).orElse(null);
+            } else {
+                nextPostEntity = null;
+            }
         }
-        return null;
+
+        // Если нашли пост — конвертируем в DTO, если нет — возвращаем null
+        return (nextPostEntity != null) ? convertToDto(nextPostEntity) : null;
     }
 
-    private MyPost findNextPost(Long lastPostId) {
-        if(lastPostId == null) {
-            return myPostRepository.findFirstByOrderByCreatedAtDesc().orElse(null);
-        }
-
-        return myPostRepository.findFirstByIdLessThanOrderByCreatedAtDesc(lastPostId).orElse(null);
+    // Исправлено: принимаем Long, так как в репозитории и БД это Long
+    public void incrementLikeCount(Long postId) {
+        myPostRepository.incrementLikeCount(postId);
     }
 
     private PostDto convertToDto(MyPost myPost) {
         MyUser user = myPost.getUser();
-        // Конвертируем список MyComments в CommentsDto
+
         List<CommentDto> commentsDtos = myCommentRepository.findMyCommentsByPost(myPost)
                 .stream()
-                .map(this::convertCommentToDto) // предполагается наличие этого метода
+                .map(this::convertCommentToDto)
                 .collect(Collectors.toList());
 
         return new PostDto(
                 myPost.getId(),
                 myPost.getContent(),
-                myPost.getCreatedAt(),
+                myPost.getCreatedAt().toString(), // Преобразуй в String, если PostDto ждет строку
                 myPost.getLikeCount(),
                 commentsDtos,
                 new UserDto(
@@ -80,16 +86,12 @@ public class MyPostService {
         );
     }
 
-    public void incrementLikeCount(int postId) {
-        myPostRepository.incrementLikeCount(postId);
-    }
-
     private CommentDto convertCommentToDto(MyComment comment) {
         return new CommentDto(
                 comment.getId(),
                 comment.getUser().getNickname(),
                 comment.getText(),
-                comment.getCreatedAt()
+                comment.getCreatedAt().toString()
         );
     }
 }

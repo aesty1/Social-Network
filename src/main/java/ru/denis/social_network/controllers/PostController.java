@@ -37,7 +37,7 @@ public class PostController {
 
     @PostMapping("/{postId}/like")
     public ResponseEntity<?> like(@PathVariable("postId") int postId) {
-        myPostService.incrementLikeCount(postId);
+        myPostService.incrementLikeCount((long) postId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

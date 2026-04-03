@@ -7,14 +7,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.denis.social_network.models.MyPost;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
 public interface MyPostRepository extends JpaRepository<MyPost, Long> {
+
+    // Берем самый новый пост для начала ленты
     Optional<MyPost> findFirstByOrderByCreatedAtDesc();
-    Optional<MyPost> findFirstByIdLessThanOrderByCreatedAtDesc(Long id);
+
+    // Берем следующий пост, который был создан РАНЬШЕ (Desc), чем текущий
+    Optional<MyPost> findFirstByCreatedAtBeforeOrderByCreatedAtDesc(LocalDateTime createdAt);
+
     @Transactional
     @Modifying
     @Query("UPDATE MyPost p SET p.likeCount = p.likeCount + 1 WHERE p.id = :postId")
-    void incrementLikeCount(int postId);
+    void incrementLikeCount(Long postId); // Изменил int на Long для соответствия ID
 }
