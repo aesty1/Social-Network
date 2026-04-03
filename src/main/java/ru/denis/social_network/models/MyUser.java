@@ -22,7 +22,7 @@ public class MyUser implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 128)
     @NotNull
@@ -90,7 +90,7 @@ public class MyUser implements Serializable {
         this.nickname = nickname;
     }
 
-    public MyUser(int user_id, String email, String name, String password, String nickname) {
+    public MyUser(Long user_id, String email, String name, String password, String nickname) {
         this.id = user_id;
         this.email = email;
         this.name = name;
@@ -109,7 +109,7 @@ public class MyUser implements Serializable {
         this.friends = friends;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -133,7 +133,7 @@ public class MyUser implements Serializable {
         return posts;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
