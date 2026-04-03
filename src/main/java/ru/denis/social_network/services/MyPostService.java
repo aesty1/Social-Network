@@ -40,21 +40,24 @@ public class MyPostService {
         MyPost nextPostEntity;
 
         if (lastPostId == null || lastPostId == 0) {
-            // Берем самый свежий пост
+            // Начало ленты: просто самый новый
             nextPostEntity = myPostRepository.findFirstByOrderByCreatedAtDesc().orElse(null);
         } else {
-            // Ищем пост-ориентир
+            // 1. Находим текущий пост-ориентир
             MyPost lastPost = myPostRepository.findById(lastPostId).orElse(null);
 
             if (lastPost != null) {
-                // Ищем пост, созданный ДО (Before) времени этого поста
-                nextPostEntity = myPostRepository.findFirstByCreatedAtBeforeOrderByCreatedAtDesc(lastPost.getCreatedAt()).orElse(null);
+                // 2. Ищем строго следующий «вниз» по времени и ID
+                nextPostEntity = myPostRepository.findFirstByCreatedAtBeforeOrCreatedAtAndIdLessThanOrderByCreatedAtDescIdDesc(
+                        lastPost.getCreatedAt(),
+                        lastPost.getCreatedAt(),
+                        lastPost.getId()
+                ).orElse(null);
             } else {
                 nextPostEntity = null;
             }
         }
 
-        // Если нашли пост — конвертируем в DTO, если нет — возвращаем null
         return (nextPostEntity != null) ? convertToDto(nextPostEntity) : null;
     }
 

@@ -17,7 +17,11 @@ public interface MyPostRepository extends JpaRepository<MyPost, Long> {
     Optional<MyPost> findFirstByOrderByCreatedAtDesc();
 
     // Берем следующий пост, который был создан РАНЬШЕ (Desc), чем текущий
-    Optional<MyPost> findFirstByCreatedAtBeforeOrderByCreatedAtDesc(LocalDateTime createdAt);
+    Optional<MyPost> findFirstByCreatedAtBeforeOrCreatedAtAndIdLessThanOrderByCreatedAtDescIdDesc(
+            LocalDateTime createdAt,
+            LocalDateTime createdAtSame,
+            Long id
+    );
 
     @Transactional
     @Modifying
