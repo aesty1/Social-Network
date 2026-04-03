@@ -3,6 +3,7 @@ package ru.denis.social_network.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.denis.social_network.models.MyComment;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.CommentDto;
@@ -21,6 +22,7 @@ public class MyCommentService {
     private MyPostRepository myPostRepository;
 
     @Cacheable(value = "commentsByPostId", key = "#postId")
+    @Transactional(readOnly = true)
     public List<MyComment> getMyCommentsByPostId(int postId) {
         return myCommentRepository.findMyCommentsByPost(myPostRepository.getById(Long.valueOf(postId)));
     }
