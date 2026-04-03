@@ -20,72 +20,39 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class RealTimePostController {
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
-    private MyPostService myPostService;
-
+    private final SimpMessagingTemplate messagingTemplate;
+    private final MyPostService myPostService;
     private final Map<String, Long> userLastPostIds = new ConcurrentHashMap<>();
 
     @MessageMapping("/posts.init")
     public void initSession(SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-
-        try {
-            PostDto post = myPostService.getNextPost(null);
-
-            messagingTemplate.convertAndSend(
-                    "/topic/posts/" + sessionId,
-                    post != null ? post : "NO_POSTS_AVAILABLE"
-            );
-        } catch (Exception e) {
-            log.error("Error in initSession", e);
-
-            messagingTemplate.convertAndSendToUser(
-                    sessionId,
-                    "/topic/errors",
-                    "SERVER_ERROR: " + e.getMessage()
-            );
-        }
+        sendPostToUser(sessionId, null);
     }
 
     @MessageMapping("/posts.next")
-    public void requestNextPost(@Payload(required = false) Long lastPostIdStr,
-                                SimpMessageHeaderAccessor headerAccessor) {
+    public void requestNextPost(@Payload Long lastPostId, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-
-        try {
-            Long lastPostId = lastPostIdStr;
-
-            userLastPostIds.put(sessionId, lastPostId);
-            sendNextPost(sessionId);
-        } catch (NumberFormatException e) {
-            log.error("Invalid lastPostId format: {}", lastPostIdStr, e);
-            messagingTemplate.convertAndSendToUser(
-                    sessionId,
-                    "/topic/errors",
-                    "Invalid post ID format"
-            );
-        } catch (Exception e) {
-            log.error("Error in requestNextPost", e);
-            messagingTemplate.convertAndSendToUser(
-                    sessionId,
-                    "/topic/errors",
-                    "SERVER_ERROR: " + e.getMessage()
-            );
-        }
+        sendPostToUser(sessionId, lastPostId);
     }
 
-    private void sendNextPost(String sessionId) {
-        Long lastPostId = userLastPostIds.get(sessionId);
-        PostDto nextPost = myPostService.getNextPost(lastPostId);
+    private void sendPostToUser(String sessionId, Long lastId) {
+        try {
+            PostDto post = myPostService.getNextPost(lastId);
 
-        if (nextPost != null) {
-            messagingTemplate.convertAndSend("/topic/posts/" + sessionId, nextPost);
-            userLastPostIds.put(sessionId, nextPost.getId());
-        } else {
-            messagingTemplate.convertAndSend("/topic/posts/" + sessionId, "NO_POSTS_AVAILABLE");
+            // Используем convertAndSendToUser.
+            // В Spring это отправит данные в /user/queue/posts
+            // (префикс /user/ добавляется автоматически)
+            if (post != null) {
+                messagingTemplate.convertAndSendToUser(sessionId, "/queue/posts", post);
+                userLastPostIds.put(sessionId, post.getId());
+            } else {
+                // Вместо строки отправляем пустой объект или спец. статус
+                // Для простоты Android-кода отправим null или пустой DTO
+                messagingTemplate.convertAndSendToUser(sessionId, "/queue/posts", "EOF");
+            }
+        } catch (Exception e) {
+            log.error("Error sending post", e);
         }
     }
 }
