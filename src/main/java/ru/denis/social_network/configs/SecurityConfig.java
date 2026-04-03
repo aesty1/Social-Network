@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login")
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/register", "/login", "/authenticate/**", "/js/**", "confirm-account").permitAll()
+                        .requestMatchers("/register", "/login", "/authenticate/**", "/js/**", "confirm-account", "/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
