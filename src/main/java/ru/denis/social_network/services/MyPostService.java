@@ -74,7 +74,7 @@ public class MyPostService {
         return new PostDto(
                 myPost.getId(),
                 myPost.getContent(),
-                myPost.getCreatedAt().toString(), // Преобразуй в String, если PostDto ждет строку
+                myPost.getCreatedAt(), // УБРАЛ .toString()
                 myPost.getLikeCount(),
                 commentsDtos,
                 new UserDto(
@@ -91,7 +91,7 @@ public class MyPostService {
                 comment.getId(),
                 comment.getUser().getNickname(),
                 comment.getText(),
-                comment.getCreatedAt().toString()
+                comment.getCreatedAt() // УБРАЛ .toString()
         );
     }
 }
