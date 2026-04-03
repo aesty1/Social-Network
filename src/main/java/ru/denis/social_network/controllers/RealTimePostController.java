@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import ru.denis.social_network.models.dto.PostDto;
@@ -14,45 +15,33 @@ import ru.denis.social_network.services.MyPostService;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class RealTimePostController {
 
-    private final SimpMessagingTemplate messagingTemplate;
     private final MyPostService myPostService;
-    private final Map<String, Long> userLastPostIds = new ConcurrentHashMap<>();
 
+    // Инициализация первого поста
     @MessageMapping("/posts.init")
-    public void initSession(SimpMessageHeaderAccessor headerAccessor) {
-        String sessionId = headerAccessor.getSessionId();
-        sendPostToUser(sessionId, null);
+    @SendToUser("/queue/posts") // Ответ уйдет только тому, кто запросил
+    public PostDto initSession() {
+        log.info("Инициализация ленты");
+        return myPostService.getNextPost(null);
     }
 
+    // Запрос следующего поста
     @MessageMapping("/posts.next")
-    public void requestNextPost(@Payload Long lastPostId, SimpMessageHeaderAccessor headerAccessor) {
-        String sessionId = headerAccessor.getSessionId();
-        sendPostToUser(sessionId, lastPostId);
-    }
+    @SendToUser("/queue/posts")
+    public PostDto requestNextPost(@Payload String lastPostIdStr) {
+        log.info("Запрос следующего поста после: {}", lastPostIdStr);
 
-    private void sendPostToUser(String sessionId, Long lastId) {
-        try {
-            PostDto post = myPostService.getNextPost(lastId);
-
-            // Используем convertAndSendToUser.
-            // В Spring это отправит данные в /user/queue/posts
-            // (префикс /user/ добавляется автоматически)
-            if (post != null) {
-                messagingTemplate.convertAndSendToUser(sessionId, "/queue/posts", post);
-                userLastPostIds.put(sessionId, post.getId());
-            } else {
-                // Вместо строки отправляем пустой объект или спец. статус
-                // Для простоты Android-кода отправим null или пустой DTO
-                messagingTemplate.convertAndSendToUser(sessionId, "/queue/posts", "EOF");
-            }
-        } catch (Exception e) {
-            log.error("Error sending post", e);
+        // Очищаем строку от кавычек, если они прилетели из JSON
+        Long lastId = null;
+        if (lastPostIdStr != null && !lastPostIdStr.replace("\"", "").equals("null")) {
+            lastId = Long.parseLong(lastPostIdStr.replace("\"", ""));
         }
+
+        return myPostService.getNextPost(lastId);
     }
 }
