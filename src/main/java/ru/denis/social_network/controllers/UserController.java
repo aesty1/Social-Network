@@ -117,11 +117,15 @@ public class UserController {
     }
 
     @PostMapping("/friends/add/{id}")
-    public ResponseEntity<?> addFriend(@PathVariable @Min(1) Long id, HttpServletRequest request) {
-        myFriendRequestService.sendFriendRequest(getCurrentUserId(request), id);
+    public ResponseEntity<?> addFriend(@PathVariable Long id, HttpServletRequest request) {
+        Long myId = getCurrentUserId(request);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("Friend add ok");
+        if(id.equals(myId)) {
+            return ResponseEntity.badRequest().body("Нельзя добавить самого себя");
+        }
+
+        myFriendRequestService.sendFriendRequest(myId, id);
+        return ResponseEntity.ok("Friend add ok");
     }
 
     @PostMapping("/friends/remove/{id}")
