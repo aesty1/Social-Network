@@ -203,10 +203,9 @@ public class UserController {
     }
 
     private Long getCurrentUserId(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
         String token = null;
 
-        // 1. Пытаемся достать токен из заголовка Authorization (для Android)
-        String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
         }
@@ -220,19 +219,13 @@ public class UserController {
                     .orElse(null);
         }
 
-        // 3. Если токена нет нигде — возвращаем -1 (ошибка авторизации)
-        if (token == null) {
-            return -1L;
-        }
+        if (token == null) return -1L;
 
         try {
-            // Используем твой jwtProvider для получения имени
             String username = jwtProvider.extractUsername(token);
             MyUser user = myUserService.getUserByUsername(username);
-
-            return (user != null) ? user.getId() : -1;
+            return (user != null) ? user.getId() : -1L;
         } catch (Exception e) {
-            // Если токен просрочен или "кривой"
             return -1L;
         }
     }
