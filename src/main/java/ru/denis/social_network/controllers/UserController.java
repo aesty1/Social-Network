@@ -44,31 +44,26 @@ public class UserController {
     private MyChatRepository myChatRepository;
 
     @GetMapping("/me")
-    public ResponseEntity<?> getMyProfile(Model model, HttpServletRequest request) {
+    public ResponseEntity<?> getMyProfile(HttpServletRequest request) {
         MyUser user = myUserService.getUserById(getCurrentUserId(request));
         List<FriendDto> friends = myFriendService.getFriends(user.getId());
 
-//        model.addAttribute("user", user);
-//        model.addAttribute("friends", friends);
-//        model.addAttribute("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
+        // Входящие заявки (те, кто подписался на меня)
+        List<MyFriendRequest> followers = myFriendRequestService.findByReceiverAndStatus(user, "PENDING");
 
-        List<MyFriendRequest> filteredFriends = myFriendRequestService.findByReceiverAndStatus(user, "PENDING").stream()
-                .filter(f -> f.getSender().getId() != user.getId()).toList();
-
+        // Исходящие заявки (те, на кого подписался я)
+        // Убедись, что в MyFriendRequestService есть такой метод
+        List<MyFriendRequest> subscriptions = myFriendRequestService.findBySenderAndStatus(user, "PENDING");
 
         Map<String, Object> response = new HashMap<>();
         response.put("user", user);
         response.put("friends", friends);
+        response.put("followers", followers); // Переименовал для ясности
+        response.put("subscriptions", subscriptions); // Новое поле
+        // Список всех пользователей (если нужно для поиска)
         response.put("users", myUserService.getAll().stream().filter(u -> u.getId() != user.getId()).collect(toList()));
-        if(!filteredFriends.isEmpty()) {
-            response.put("filteredFriends", filteredFriends);
-        } else {
-            response.put("filteredFriends", new ArrayList<>());
-        }
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{nickname}")

@@ -76,4 +76,9 @@ public class MyFriendRequestService {
     public List<MyFriendRequest> findByReceiverAndStatus(MyUser receiver, String status) {
         return myFriendRequestRepository.findByReceiverAndStatus(receiver, status);
     }
+
+    @Cacheable(value = "bySenderAndStatus")
+    public List<MyFriendRequest> findBySenderAndStatus(MyUser sender, String status) {
+        return myFriendRequestRepository.findBySenderAndStatus(sender, status);
+    }
 }
