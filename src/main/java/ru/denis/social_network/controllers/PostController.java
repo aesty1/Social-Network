@@ -27,13 +27,7 @@ public class PostController {
         return "posts";
     }
 
-    @GetMapping("/{postId}/comments")
-    public ResponseEntity<?> comments(@PathVariable("postId") int postId, Model model) {
-//        model.addAttribute("comments", myCommentService.getMyCommentsByPostId(postId));
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(myCommentService.getMyCommentsByPostId(postId));
-    }
 
     @PostMapping("/{postId}/like")
     public ResponseEntity<?> like(@PathVariable("postId") int postId) {

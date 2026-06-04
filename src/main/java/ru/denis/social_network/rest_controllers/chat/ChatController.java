@@ -12,8 +12,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.denis.social_network.jwts.JwtProvider;
 import ru.denis.social_network.models.MyChat;
+import ru.denis.social_network.models.MyMessage;
 import ru.denis.social_network.models.MyUser;
 import ru.denis.social_network.models.dto.ChatDto;
+import ru.denis.social_network.models.dto.MessageDTO;
 import ru.denis.social_network.models.requests.CreateChatRequest;
 import ru.denis.social_network.services.MyChatService;
 import ru.denis.social_network.services.MyMessageService;
@@ -21,10 +23,8 @@ import ru.denis.social_network.services.MyUserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/api")
@@ -70,24 +70,27 @@ public class ChatController {
     public ResponseEntity<?> getChat(@PathVariable @Min(1) int chatId, Model model, HttpServletRequest request) {
         ChatDto chat = myChatService.getChatDtoById(chatId);
 
-//        model.addAttribute("chat", chat);
-//        model.addAttribute("messages", myMessageService.getMessagesSortedByTime(chatId));
-//        model.addAttribute("currentUserId", getCurrentUserId(request));
-//        model.addAttribute("recipId", (chat.getUser1_id() == getCurrentUserId(request)) ? chat.getUser2_id() : chat.getUser1_id());
-//        model.addAttribute("currentUser", myUserService.getUserById(getCurrentUserId(request)));
-//        model.addAttribute("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
+        // ИСПРАВЛЕНИЕ: Конвертируем MyMessage в MessageDTO с заполненными полями
+        List<MyMessage> messages = myMessageService.getMessagesSortedByTime(chatId);
+        List<MessageDTO> messageDTOs = messages.stream().map(msg -> {
+            MessageDTO dto = new MessageDTO();
+            dto.setChatId(chatId);
+            dto.setSenderId(msg.getSender().getId());
+            dto.setSenderNickname(msg.getSender().getNickname());
+            dto.setContent(msg.getContent());
+            dto.setSentAt(msg.getSentAt());
+            return dto;
+        }).collect(Collectors.toList());
 
         Map<String, Object> response = new HashMap<>();
-
         response.put("chat", chat);
-        response.put("messages", myMessageService.getMessagesSortedByTime(chatId));
+        response.put("messages", messageDTOs);  // Отдаём DTO вместо сущностей
         response.put("currentUserId", getCurrentUserId(request));
         response.put("recipId", (chat.getUser1_id() == getCurrentUserId(request)) ? chat.getUser2_id() : chat.getUser1_id());
         response.put("currentUser", myUserService.getUserById(getCurrentUserId(request)));
         response.put("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     private Long getCurrentUserId(HttpServletRequest request) {
