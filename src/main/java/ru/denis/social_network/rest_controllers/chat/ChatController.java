@@ -3,6 +3,7 @@ package ru.denis.social_network.rest_controllers.chat;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import javax.validation.constraints.Min;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j  // ВАЖНО: добавляет логгер
 @Controller
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -45,6 +47,7 @@ public class ChatController {
 
     @PostMapping("/chat/create")
     public ResponseEntity<Void> createChat(@RequestBody @Valid CreateChatRequest request) {
+        log.info(">>> CHAT_CONTROLLER_V2: createChat called");
         myChatService.createChat(request.getUser1Id(), request.getUser2Id());
 
         return ResponseEntity
@@ -55,11 +58,9 @@ public class ChatController {
 
     @GetMapping("/chats")
     public ResponseEntity<?> getAllChats(Model model, HttpServletRequest request) {
-//        model.addAttribute("chats", myChatService.getUsersChats(getCurrentUserId(request)));
-//        model.addAttribute("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
+        log.info(">>> CHAT_CONTROLLER_V2: getAllChats called");
 
         Map<String, Object> response = new HashMap<>();
-
         response.put("chats", myChatService.getUsersChats(getCurrentUserId(request)));
         response.put("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
         return ResponseEntity.status(HttpStatus.OK)
@@ -68,28 +69,50 @@ public class ChatController {
 
     @GetMapping("/chat/{chatId}")
     public ResponseEntity<?> getChat(@PathVariable @Min(1) int chatId, Model model, HttpServletRequest request) {
-        ChatDto chat = myChatService.getChatDtoById(chatId);
+        log.info(">>> CHAT_CONTROLLER_V2: getChat called for chatId={}", chatId);
 
-        // ИСПРАВЛЕНИЕ: Конвертируем MyMessage в MessageDTO с заполненными полями
+        ChatDto chat = myChatService.getChatDtoById(chatId);
+        Long currentUserId = getCurrentUserId(request);
+
+        log.info(">>> CHAT_CONTROLLER_V2: currentUserId={}", currentUserId);
+
+        // Загружаем сообщения
         List<MyMessage> messages = myMessageService.getMessagesSortedByTime(chatId);
-        List<MessageDTO> messageDTOs = messages.stream().map(msg -> {
+        log.info(">>> CHAT_CONTROLLER_V2: loaded {} messages from DB", messages.size());
+
+        // Конвертируем с явным логированием
+        List<MessageDTO> messageDTOs = new ArrayList<>();
+        for (MyMessage msg : messages) {
             MessageDTO dto = new MessageDTO();
             dto.setChatId(chatId);
-            dto.setSenderId(msg.getSender().getId());
-            dto.setSenderNickname(msg.getSender().getNickname());
+
+            // Явно достаём sender
+            MyUser sender = msg.getSender();
+            if (sender != null) {
+                dto.setSenderId(sender.getId());
+                dto.setSenderNickname(sender.getNickname());
+                log.info(">>> CHAT_CONTROLLER_V2: msg='{}' senderId={} senderNickname={}",
+                        msg.getContent(), sender.getId(), sender.getNickname());
+            } else {
+                dto.setSenderId(null);
+                dto.setSenderNickname(null);
+                log.warn(">>> CHAT_CONTROLLER_V2: msg='{}' has NULL sender!", msg.getContent());
+            }
+
             dto.setContent(msg.getContent());
             dto.setSentAt(msg.getSentAt());
-            return dto;
-        }).collect(Collectors.toList());
+            messageDTOs.add(dto);
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("chat", chat);
-        response.put("messages", messageDTOs);  // Отдаём DTO вместо сущностей
-        response.put("currentUserId", getCurrentUserId(request));
-        response.put("recipId", (chat.getUser1_id() == getCurrentUserId(request)) ? chat.getUser2_id() : chat.getUser1_id());
-        response.put("currentUser", myUserService.getUserById(getCurrentUserId(request)));
-        response.put("nickname", myUserService.getUserById(getCurrentUserId(request)).getNickname());
+        response.put("messages", messageDTOs);
+        response.put("currentUserId", currentUserId);
+        response.put("recipId", (chat.getUser1_id() == currentUserId) ? chat.getUser2_id() : chat.getUser1_id());
+        response.put("currentUser", myUserService.getUserById(currentUserId));
+        response.put("nickname", myUserService.getUserById(currentUserId).getNickname());
 
+        log.info(">>> CHAT_CONTROLLER_V2: returning {} messageDTOs", messageDTOs.size());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
