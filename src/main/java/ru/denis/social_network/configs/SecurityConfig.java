@@ -61,8 +61,10 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/register", "/login", "/authenticate/**", "/js/**", "confirm-account", "/ws/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
                         .anyRequest().authenticated()
                 )
+
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")  // Добавьте эту строку
                         .userInfoEndpoint(userInfo -> userInfo
